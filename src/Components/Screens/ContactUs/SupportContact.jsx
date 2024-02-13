@@ -27,21 +27,18 @@ const SupportContact = () => {
   return (
     <View style={styles.container}>
       <Text style={[styles.header, { fontFamily: "Raleway_700Bold" }]}>
-        Support Contact
+        Contact de soutien
       </Text>
 
       <TouchableOpacity style={styles.section}>
         <View style={styles.iconText}>
           <Feather name="phone-call" size={18} color={"#437CEE"} />
           <Text style={[styles.label, { fontFamily: "Nunito_600SemiBold" }]}>
-            Phone
+            Téléphone
           </Text>
         </View>
         <Text style={[styles.info, { fontFamily: "Nunito_400Regular" }]}>
           Mobile: (+88) 872-670-780
-        </Text>
-        <Text style={[styles.info, { fontFamily: "Nunito_400Regular" }]}>
-          Hotline: (+88) 422-655-793
         </Text>
       </TouchableOpacity>
 
@@ -57,21 +54,6 @@ const SupportContact = () => {
         </Text>
         <Text style={[styles.info, { fontFamily: "Nunito_400Regular" }]}>
           Contact@example.com
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.section}>
-        <View style={styles.iconText}>
-          <Ionicons name="location" size={20} color={"#437CEE"} />
-          <Text style={[styles.label, { fontFamily: "Nunito_600SemiBold" }]}>
-            Location
-          </Text>
-        </View>
-        <Text style={[styles.info, { fontFamily: "Nunito_400Regular" }]}>
-          Abbot Kinney Blvd. New York,
-        </Text>
-        <Text style={[styles.info, { fontFamily: "Nunito_400Regular" }]}>
-          USA-5785
         </Text>
       </TouchableOpacity>
     </View>

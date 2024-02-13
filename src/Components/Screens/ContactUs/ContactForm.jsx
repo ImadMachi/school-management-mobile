@@ -1,34 +1,49 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { styles } from "../../Styles/ContactScreenStyles/ContactFormScreen.stylex";
 import { Picker } from "@react-native-picker/picker";
 import { FontAwesome } from "@expo/vector-icons";
 import { useFonts, Raleway_700Bold } from "@expo-google-fonts/raleway";
 import { Nunito_400Regular } from "@expo-google-fonts/nunito";
+import { getAdministratorUsers } from "../../../services/users";
+import { Administrator } from "../../../Constants/userRoles";
+import { ActivityIndicator } from "react-native-paper";
+import { sendMessage } from "../../../services/messages";
 
 const ContactForm = () => {
-  const [selectedOption, setSelectedOption] = useState("Course");
   const [contactInfo, setContactInfo] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    selectedOptions: selectedOption,
+    subject: "",
     message: "",
+    recipient: "option1",
   });
   const [error, setError] = useState("");
+  const [administratorsList, setAdministratorsList] = useState([]);
+  const [buttonSpinner, setButtonSpinner] = useState(false);
 
-  const handleContactSubmit = () => {
-    const name = contactInfo.name;
-    const phone = contactInfo.phone;
-    const email = contactInfo.email;
-    const selected = contactInfo.selectedOptions;
+  useEffect(() => {
+    (async () => {
+      const data = await getAdministratorUsers(Administrator);
+      if (data) {
+        setAdministratorsList(data);
+        setContactInfo({ ...contactInfo, recipient: data[0].id });
+      }
+    })();
+  }, []);
+
+  const handleContactSubmit = async () => {
     const message = contactInfo.message;
+    const subject = contactInfo.subject;
+    const recipient = contactInfo.recipient;
 
-    if (name && phone && email && selected && message && selected) {
-      console.log(name, phone, email, selected, message);
+    if (subject && message && recipient) {
       setError("");
+      setButtonSpinner(true);
+      await sendMessage({ message, subject, recipient });
+      setContactInfo({ ...contactInfo, subject: "", message: "" });
+      setButtonSpinner(false);
     } else {
-      setError("Please fill up all required field");
+      setError("Veuillez remplir tous les champs requis");
+      setButtonSpinner(false);
     }
   };
 
@@ -44,7 +59,7 @@ const ContactForm = () => {
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { fontFamily: "Raleway_700Bold" }]}>
-        Get in Touch
+        Contactez l'administration
       </Text>
 
       {error && (
@@ -56,39 +71,32 @@ const ContactForm = () => {
         </View>
       )}
 
+      <View style={styles.inputContainer}></View>
+
+      <Picker
+        selectedValue={contactInfo.recipient}
+        onValueChange={(value, index) =>
+          setContactInfo({ ...contactInfo, recipient: value })
+        }
+        style={styles.recipientPicker}
+      >
+        {administratorsList.map((administratorUser) => (
+          <Picker.Item
+            key={administratorUser.id}
+            label={`${administratorUser?.administrator?.firstName} ${administratorUser?.administrator?.lastName}`}
+            value={administratorUser.id}
+          />
+        ))}
+      </Picker>
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Name"
+          placeholder="Objet"
           placeholderTextColor="#888"
+          value={contactInfo.subject}
           onChangeText={(value) =>
-            setContactInfo({ ...contactInfo, name: value })
-          }
-        />
-        <TextInput
-          style={styles.inputPhone}
-          placeholder="Phone"
-          placeholderTextColor="#888"
-          onChangeText={(value) =>
-            setContactInfo({ ...contactInfo, phone: value })
-          }
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#888"
-          onChangeText={(value) =>
-            setContactInfo({ ...contactInfo, email: value })
-          }
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Courses"
-          placeholderTextColor="#888"
-          onChangeText={(value) =>
-            setContactInfo({ ...contactInfo, email: value })
+            setContactInfo({ ...contactInfo, subject: value })
           }
         />
       </View>
@@ -99,6 +107,7 @@ const ContactForm = () => {
         multiline={true}
         numberOfLines={4}
         fontSize={16}
+        value={contactInfo.message}
         onChangeText={(value) =>
           setContactInfo({ ...contactInfo, message: value })
         }
@@ -107,7 +116,15 @@ const ContactForm = () => {
         style={styles.submitButton}
         onPress={handleContactSubmit}
       >
-        <Text style={styles.submitButtonText}>Submit</Text>
+        {buttonSpinner ? (
+          <ActivityIndicator size={"small"} color={"white"} />
+        ) : (
+          <Text
+            style={[styles.submitButtonText, { fontFamily: "Raleway_700Bold" }]}
+          >
+            Envoyer
+          </Text>
+        )}
       </TouchableOpacity>
     </View>
   );

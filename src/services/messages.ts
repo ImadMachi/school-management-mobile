@@ -31,3 +31,41 @@ export async function getMessages(folder: string) {
     });
   }
 }
+
+interface sendMessageProps {
+  message: string;
+  subject: string;
+  recipient: number;
+}
+export async function sendMessage(data: sendMessageProps) {
+  try {
+    const formData = new FormData();
+    formData.append("subject", data.subject);
+    formData.append("body", data.message);
+    formData.append(`recipients[0][id]`, data.recipient.toString());
+    formData.append("categoryId", `1`);
+
+    const response = await axios.post(`${BASE_URL}/messages`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    Toast.show("message envoyé avec succès", {
+      type: "success",
+      placement: "bottom",
+      duration: 2000,
+      animationType: "zoom-in",
+    });
+  } catch (error) {
+    console.log(error.message);
+
+    Toast.show("Erreur lors de l'envoi du message", {
+      type: "danger",
+      placement: "bottom",
+      duration: 2000,
+      animationType: "zoom-in",
+      successColor: "red",
+    });
+  }
+}

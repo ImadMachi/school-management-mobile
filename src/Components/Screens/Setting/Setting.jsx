@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,35 +12,43 @@ import AnimatedLoading from "../../Shared/AnimatedLoading/AnimatedLoading";
 import { FontAwesome } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomDrawerHeader from "../../Custom/CustomDrawerHeader";
+import { AuthContext } from "../../../Context/AuthProvider";
+import { Toast } from "react-native-toast-notifications";
 
 const Setting = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading } = useContext(AuthContext);
   const [profileInfo, setProfileInfo] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
-    phone: "",
-    address: "",
   });
+
   const [error, setError] = useState("");
 
   const handleProfileInfo = () => {
-    const name = profileInfo.name;
+    const firstName = profileInfo.firstName;
+    const lastName = profileInfo.lastName;
     const email = profileInfo.email;
-    const phone = profileInfo.phone;
-    const address = profileInfo.address;
-
-    if (name && email && phone && address) {
+    console.log(firstName, lastName, email);
+    if (firstName && lastName && email) {
       setError("");
+      Toast.show("Modifications suggérées avec succès", {
+        position: "bottom",
+        type: "success",
+        duration: 3000,
+      });
     } else {
-      setError("Please fill up all required field");
+      setError("Veuillez remplir tous les champs requis");
     }
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-  }, []);
+    setProfileInfo({
+      firstName: user?.userData?.firstName,
+      lastName: user?.userData?.lastName,
+      email: user?.email,
+    });
+  }, [user]);
 
   return (
     <>
@@ -51,14 +59,14 @@ const Setting = () => {
           colors={["#E5ECF9", "#F6F7F9"]}
           style={styles.mainContainer}
         >
-          <CustomDrawerHeader>Settings</CustomDrawerHeader>
+          <CustomDrawerHeader>Voir les détails</CustomDrawerHeader>
           <ScrollView>
             <View style={styles.container}>
               <Image
-                source={require("../../../../assets/Images/user.png")}
+                source={require("../../../../assets/Images/student-avatar.png")}
                 style={styles.profileImage}
               />
-              <Text style={styles.title}>Edit Profile</Text>
+              <Text style={styles.title}>Editer le profil</Text>
               {error && (
                 <View style={styles.errorContainer}>
                   <FontAwesome name="close" size={20} color={"red"} />
@@ -67,32 +75,35 @@ const Setting = () => {
               )}
               <TextInput
                 style={styles.textInput}
-                placeholder="Eduman"
+                placeholder="John"
                 placeholderTextColor="#888"
                 keyboardType="default"
                 onChangeText={(value) =>
-                  setProfileInfo({ ...profileInfo, name: value })
+                  setProfileInfo({ ...profileInfo, firstName: value })
                 }
+                value={profileInfo.firstName}
               />
               <TextInput
                 style={styles.textInput}
-                placeholder="example@eduman.com"
+                placeholder="Doe"
                 placeholderTextColor="#888"
-                keyboardType="email-address"
+                keyboardType="default"
+                onChangeText={(value) =>
+                  setProfileInfo({ ...profileInfo, lastName: value })
+                }
+                value={profileInfo.lastName}
+              />
+              <TextInput
+                style={styles.textInput}
+                placeholder="Email"
+                placeholderTextColor="#888"
+                keyboardType="default"
                 onChangeText={(value) =>
                   setProfileInfo({ ...profileInfo, email: value })
                 }
+                value={profileInfo.email}
               />
-              <TextInput
-                style={styles.textInput}
-                placeholder="+453 597 349 998"
-                placeholderTextColor="#888"
-                keyboardType="phone-pad"
-                onChangeText={(value) =>
-                  setProfileInfo({ ...profileInfo, phone: value })
-                }
-              />
-              <TextInput
+              {/* <TextInput
                 style={styles.textInput}
                 placeholder="Melbon, Australia"
                 placeholderTextColor="#888"
@@ -100,12 +111,14 @@ const Setting = () => {
                 onChangeText={(value) =>
                   setProfileInfo({ ...profileInfo, address: value })
                 }
-              />
+              /> */}
               <TouchableOpacity
                 style={styles.saveButton}
                 onPress={handleProfileInfo}
               >
-                <Text style={styles.saveButtonText}>Save Changes</Text>
+                <Text style={styles.saveButtonText}>
+                  Suggérer les modifications
+                </Text>
               </TouchableOpacity>
             </View>
           </ScrollView>

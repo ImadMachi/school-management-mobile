@@ -145,7 +145,7 @@ const MessageDetails = () => {
         colors={["#E5ECF9", "#F6F7F9"]}
         style={styles.mainContainer}
       >
-        <CustomBackHeader>Course</CustomBackHeader>
+        <CustomBackHeader>Message</CustomBackHeader>
         <ScrollView>
           <View style={styles.courseImageContainer}>
             <Image
@@ -240,13 +240,20 @@ const MessageDetails = () => {
 
                   if (IMAGE_EXTENSIONS.includes(fileExtension)) {
                     return (
-                      <Image
-                        style={styles.attachmentImage}
+                      <TouchableOpacity
                         key={attachment.id}
-                        source={{
-                          uri: `${BASE_URL}/uploads/attachments/${attachment.filepath}`,
-                        }}
-                      />
+                        onPress={() =>
+                          downloadFile(attachment.filepath, attachment.filename)
+                        }
+                      >
+                        <Image
+                          style={styles.attachmentImage}
+                          key={attachment.id}
+                          source={{
+                            uri: `${BASE_URL}/uploads/attachments/${attachment.filepath}`,
+                          }}
+                        />
+                      </TouchableOpacity>
                     );
                   } else {
                     return (

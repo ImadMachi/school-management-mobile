@@ -29,13 +29,13 @@ const CustomDrawerHeader = ({ children }) => {
         {children}
       </Text>
       <TouchableOpacity
-        style={styles.backIconWrapper}
-        onPress={() => navigation.navigate("Cart")}
+      // style={styles.backIconWrapper}
+      // onPress={() => navigation.navigate("Cart")}
       >
-        <View>
+        {/* <View>
           <View style={styles.cartRed}></View>
           <Feather name="shopping-bag" size={26} color={"black"} />
-        </View>
+        </View> */}
       </TouchableOpacity>
     </View>
   );

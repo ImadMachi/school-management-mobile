@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import {
   MaterialCommunityIcons,
@@ -20,17 +20,17 @@ import {
   Nunito_600SemiBold,
   Nunito_700Bold,
 } from "@expo-google-fonts/nunito";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
 import CustomDrawerHeader from "../../Custom/CustomDrawerHeader";
+import { AuthContext } from "../../../Context/AuthProvider";
+import { Student, Teacher } from "../../../Constants/userRoles";
 
 const Profile = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-  }, []);
+  const { user, isLoading } = useContext(AuthContext);
 
   let [fontsLoaded, fontError] = useFonts({
     Raleway_600SemiBold,
@@ -65,7 +65,7 @@ const Profile = () => {
                 <View style={styles.userImageBorder}>
                   <Image
                     style={styles.userImage}
-                    source={require("../../../../assets/Images/mentor/mentor_1.png")}
+                    source={require("../../../../assets/Images/student-avatar.png")}
                   />
                 </View>
                 <View style={styles.userNameSection}>
@@ -75,7 +75,7 @@ const Profile = () => {
                       { fontFamily: "Raleway_600SemiBold" },
                     ]}
                   >
-                    Elon Musk
+                    {user?.userData?.firstName} {user?.userData?.lastName}
                   </Text>
                   <Text
                     style={[
@@ -83,32 +83,34 @@ const Profile = () => {
                       { fontFamily: "Nunito_400Regular" },
                     ]}
                   >
-                    Congrats you have rech platinum
+                    {user.role === Student ? "Etudiant" : "Parent"}
                   </Text>
                 </View>
               </View>
 
               <View style={styles.achiveContainer}>
                 <View style={styles.achiveWrapper}>
-                  <AntDesign name="book" size={20} color={"white"} />
+                  <FontAwesome name="venus-mars" size={20} color={"white"} />
                   <Text
                     style={[
                       styles.achiveText,
                       { fontFamily: "Nunito_600SemiBold" },
                     ]}
                   >
-                    53 Course
+                    {user?.userData?.sex}
                   </Text>
                 </View>
                 <View style={styles.achiveWrapper}>
-                  <AntDesign name="clockcircleo" size={20} color={"white"} />
+                  <FontAwesome name="birthday-cake" size={20} color={"white"} />
                   <Text
                     style={[
                       styles.achiveText,
                       { fontFamily: "Nunito_600SemiBold" },
                     ]}
                   >
-                    20 Hours
+                    {format(user?.userData?.dateOfBirth, "dd MMMM yyyy", {
+                      locale: fr,
+                    })}
                   </Text>
                 </View>
                 <View style={styles.achiveWrapper}>
@@ -119,28 +121,9 @@ const Profile = () => {
                       { fontFamily: "Nunito_600SemiBold" },
                     ]}
                   >
-                    120 Modules
+                    Class 2
                   </Text>
                 </View>
-              </View>
-
-              <View style={styles.refferContainer}>
-                <Text
-                  style={[
-                    styles.referralText,
-                    { fontFamily: "Nunito_700Bold" },
-                  ]}
-                >
-                  Referral Program
-                </Text>
-                <Text
-                  style={[
-                    styles.invititionText,
-                    { fontFamily: "Nunito_600SemiBold" },
-                  ]}
-                >
-                  Invite your friends to get free asset up to $100
-                </Text>
               </View>
             </LinearGradient>
 
@@ -150,7 +133,7 @@ const Profile = () => {
                   [styles.accountText, { fontFamily: "Raleway_700Bold" }],
                 ]}
               >
-                Account Details
+                Détails du compte
               </Text>
               <TouchableOpacity
                 style={styles.detailWrapper}
@@ -172,7 +155,7 @@ const Profile = () => {
                         { fontFamily: "Nunito_700Bold" },
                       ]}
                     >
-                      Detail Profile
+                      Détails du profil
                     </Text>
                     <Text
                       style={[
@@ -180,7 +163,7 @@ const Profile = () => {
                         { fontFamily: "Nunito_400Regular" },
                       ]}
                     >
-                      Information Account
+                      Voir les informations de compte
                     </Text>
                   </View>
                 </View>
@@ -190,12 +173,15 @@ const Profile = () => {
                   <AntDesign name="right" size={26} color={"#CBD5E0"} />
                 </TouchableOpacity>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.detailWrapper}>
+              <TouchableOpacity
+                style={styles.detailWrapper}
+                onPress={() => navigation.navigate("Contact")}
+              >
                 <View style={styles.detailLeftSection}>
                   <View style={styles.detailUserIcon}>
                     <AntDesign
                       style={styles.iconCenter}
-                      name="idcard"
+                      name="mail"
                       size={20}
                       color={"black"}
                     />
@@ -207,7 +193,7 @@ const Profile = () => {
                         { fontFamily: "Nunito_700Bold" },
                       ]}
                     >
-                      Identify
+                      Contacter l'administration
                     </Text>
                     <Text
                       style={[
@@ -215,82 +201,13 @@ const Profile = () => {
                         { fontFamily: "Nunito_400Regular" },
                       ]}
                     >
-                      Verification status setting
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity>
-                  <AntDesign name="right" size={26} color={"#CBD5E0"} />
-                </TouchableOpacity>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.detailWrapper}
-                onPress={() => navigation.navigate("Order History")}
-              >
-                <View style={styles.detailLeftSection}>
-                  <View style={styles.detailUserIcon}>
-                    <MaterialCommunityIcons
-                      style={styles.iconCenter}
-                      name="book-account-outline"
-                      size={22}
-                      color={"black"}
-                    />
-                  </View>
-                  <View>
-                    <Text
-                      style={[
-                        styles.boldText,
-                        { fontFamily: "Nunito_700Bold" },
-                      ]}
-                    >
-                      Order History
-                    </Text>
-                    <Text
-                      style={[
-                        styles.regularText,
-                        { fontFamily: "Nunito_400Regular" },
-                      ]}
-                    >
-                      Your Order History
+                      Contactez l'administration
                     </Text>
                   </View>
                 </View>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate("Order History")}
+                  onPress={() => navigation.navigate("Contact")}
                 >
-                  <AntDesign name="right" size={26} color={"#CBD5E0"} />
-                </TouchableOpacity>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.detailWrapper}>
-                <View style={styles.detailLeftSection}>
-                  <View style={styles.detailUserIcon}>
-                    <FontAwesome
-                      style={styles.iconCenter}
-                      name="credit-card"
-                      size={18}
-                      color={"black"}
-                    />
-                  </View>
-                  <View>
-                    <Text
-                      style={[
-                        styles.boldText,
-                        { fontFamily: "Nunito_700Bold" },
-                      ]}
-                    >
-                      Payment Account
-                    </Text>
-                    <Text
-                      style={[
-                        styles.regularText,
-                        { fontFamily: "Nunito_400Regular" },
-                      ]}
-                    >
-                      Manage Your Payment
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity>
                   <AntDesign name="right" size={26} color={"#CBD5E0"} />
                 </TouchableOpacity>
               </TouchableOpacity>

@@ -25,7 +25,12 @@ export const styles = StyleSheet.create({
 
   userNameBottomText: { color: "#abccec", fontSize: 15 },
 
-  userImageBorder: { borderWidth: 3, borderColor: "white", borderRadius: 50 },
+  userImageBorder: {
+    borderWidth: 3,
+    borderColor: "white",
+    borderRadius: 50,
+    overflow: "hidden",
+  },
 
   achiveContainer: {
     flexDirection: "row",

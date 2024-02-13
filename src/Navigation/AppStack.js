@@ -16,6 +16,8 @@ import {
 } from "@expo-google-fonts/nunito";
 import CourseDetails from "../Components/Screens/CourseDetails/CourseDetails";
 import HomeNavigation from "./HomeNavigation";
+import Profile from "../Components/Screens/Profile/Profile";
+import Home from "../Components/Screens/Home/Home";
 
 const Drawer = createDrawerNavigator();
 
@@ -40,7 +42,8 @@ const AppStack = () => {
     >
       <Drawer.Screen
         name="Home Page"
-        component={BottomTabNavigation}
+        // component={BottomTabNavigation}
+        component={Home}
         options={{
           drawerIcon: () => <Entypo name="home" size={22} color={"gray"} />,
           drawerLabelStyle: {
@@ -52,12 +55,52 @@ const AppStack = () => {
       />
 
       <Drawer.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          drawerIcon: () => <Entypo name="user" size={22} color={"gray"} />,
+          drawerLabelStyle: {
+            fontFamily: "Nunito_600SemiBold",
+            marginLeft: -20,
+          },
+          title: "Profile",
+        }}
+      />
+      <Drawer.Screen
+        name="Contact"
+        component={ContactUs}
+        options={{
+          drawerIcon: () => (
+            <MaterialIcons name="contact-page" size={22} color={"gray"} />
+          ),
+          drawerLabelStyle: {
+            fontFamily: "Nunito_600SemiBold",
+            marginLeft: -20,
+          },
+        }}
+      />
+
+      <Drawer.Screen
+        name="Settings"
+        component={Setting}
+        options={{
+          headerShown: false,
+          title: "Details",
+          drawerLabel: () => null,
+          drawerItemStyle: { height: 0 },
+          display: "none",
+        }}
+      />
+
+      <Drawer.Screen
         name="Course Details"
         component={CourseDetails}
         options={{
           headerShown: false,
           title: "Details",
           drawerLabel: () => null,
+          drawerItemStyle: { height: 0 },
+          display: "none",
         }}
       />
 
@@ -100,32 +143,8 @@ const AppStack = () => {
           },
         }}
       />
-      <Drawer.Screen
-        name="Contact"
-        component={ContactUs}
-        options={{
-          drawerIcon: () => (
-            <MaterialIcons name="contact-page" size={22} color={"gray"} />
-          ),
-          drawerLabelStyle: {
-            fontFamily: "Nunito_600SemiBold",
-            marginLeft: -20,
-          },
-        }}
-      />
-      <Drawer.Screen
-        name="Settings"
-        component={Setting}
-        options={{
-          drawerIcon: () => (
-            <Ionicons name="settings-sharp" size={22} color={"gray"} />
-          ),
-          drawerLabelStyle: {
-            fontFamily: "Nunito_600SemiBold",
-            marginLeft: -20,
-          },
-        }}
-      /> */}
+      
+       */}
     </Drawer.Navigator>
   );
 };

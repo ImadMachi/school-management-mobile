@@ -11,9 +11,11 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
   },
   inputContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     marginBottom: 16,
+  },
+  recipientPicker: {
+    marginBottom: 16,
+    backgroundColor: "white",
   },
   input: {
     flex: 1,
@@ -21,7 +23,8 @@ export const styles = StyleSheet.create({
     borderRadius: 4,
     paddingHorizontal: 10,
     backgroundColor: "white",
-    marginRight: 8,
+    width: "100%",
+    fontSize: 16,
   },
   inputPhone: {
     flex: 1,
@@ -34,8 +37,10 @@ export const styles = StyleSheet.create({
     height: 120,
     borderRadius: 4,
     paddingHorizontal: 10,
+    paddingVertical: 5,
     marginBottom: 16,
     backgroundColor: "white",
+    textAlignVertical: "top",
   },
   submitButton: {
     backgroundColor: "#007AFF",
