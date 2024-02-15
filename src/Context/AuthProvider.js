@@ -3,7 +3,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_URL } from "../Components/Utils/BASE_URL";
 import { Toast } from "react-native-toast-notifications";
-import { Student, Teacher } from "../Constants/userRoles";
+import { Parent, Student } from "../Constants/userRoles";
 
 export const AuthContext = createContext();
 
@@ -21,7 +21,11 @@ const AuthProvider = ({ children }) => {
         },
       });
 
+      if (response.data.role !== Student || response.data.role !== Parent) {
+        throw new Error();
+      }
       const userData = modifyUserData(response.data);
+
       setUser(userData);
       setToken(token);
 
@@ -77,9 +81,9 @@ const AuthProvider = ({ children }) => {
     if (data.role === Student) {
       data.userData = JSON.parse(JSON.stringify(data.student));
       delete data.student;
-    } else if (data.role === Teacher) {
-      data.userData = JSON.parse(JSON.stringify(data.teacher));
-      delete data.teacher;
+    } else if (data.role === Parent) {
+      data.userData = JSON.parse(JSON.stringify(data.parent));
+      delete data.parent;
     }
     return data;
   };
