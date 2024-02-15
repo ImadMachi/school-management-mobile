@@ -37,7 +37,7 @@ export const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   saveButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#72DE95",
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 24,

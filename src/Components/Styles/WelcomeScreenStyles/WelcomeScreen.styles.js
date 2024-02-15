@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   dscpWrapper: { marginTop: 30 },
 
   buttonWrapper: {
-    backgroundColor: "#2467EC",
+    backgroundColor: "#72DE95",
     width: wp("92%"),
     paddingVertical: 18,
     borderRadius: 4,

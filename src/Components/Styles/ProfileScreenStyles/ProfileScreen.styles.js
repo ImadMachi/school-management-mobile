@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
 
   userNameText: { color: "white", fontSize: 20 },
 
-  userNameBottomText: { color: "#abccec", fontSize: 15 },
+  userNameBottomText: { color: "#abece6", fontSize: 15 },
 
   userImageBorder: {
     borderWidth: 3,
@@ -43,7 +43,7 @@ export const styles = StyleSheet.create({
   achiveWrapper: {
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#1153B4",
+    backgroundColor: "#72DE95",
     borderRadius: 15,
     padding: 15,
     height: 80,

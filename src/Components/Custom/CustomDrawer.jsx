@@ -49,13 +49,13 @@ const CustomDrawer = (props) => {
         <DrawerItemList
           {...props}
           labelStyle={styles.drawerContent}
-          activeTintColor="#2E86C1"
+          activeTintColor="#72DE95"
           inactiveTintColor="#333"
         />
       </DrawerContentScrollView>
 
       <TouchableOpacity style={styles.signOutButton} onPress={() => logout()}>
-        <AntDesign name="logout" size={24} color={"#2E86C1"} />
+        <AntDesign name="logout" size={24} color={"#72DE95"} />
         <Text style={[styles.signOutText, { fontFamily: "Raleway_700Bold" }]}>
           Se déconnecter
         </Text>

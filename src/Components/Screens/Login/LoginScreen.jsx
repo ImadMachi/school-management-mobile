@@ -136,7 +136,7 @@ const Login = ({ navigation }) => {
       <ScrollView>
         <Image
           style={styles.signInImage}
-          source={require("../../../../assets/Images/Sign_in/sign_in.png")}
+          source={require("../../../../assets/Images/Sign_in/larganier.png")}
         />
         <Text style={[styles.welcomeText, { fontFamily: "Raleway_700Bold" }]}>
           Bienvenue
@@ -204,7 +204,7 @@ const Login = ({ navigation }) => {
               <Text style={styles.errorText2}>{error.password}</Text>
             </View>
           )}
-
+{/* 
           <TouchableOpacity
             onPress={() => navigation.navigate("Forgot Password")}
           >
@@ -216,7 +216,7 @@ const Login = ({ navigation }) => {
             >
               Forgot Password?
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity
             style={styles.buttonContainer}

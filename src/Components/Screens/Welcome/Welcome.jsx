@@ -31,9 +31,9 @@ const Welcome = () => {
         <View>
           <Image
             style={styles.logo}
-            source={require("../../../../assets/Images/Welcome/eduman-logo.png")}
+            source={require("../../../../assets/Images/Welcome/larganier-logo.png")}
           />
-          <Image
+           <Image
             source={require("../../../../assets/Images/Welcome/shape_9.png")}
           />
         </View>
@@ -43,7 +43,7 @@ const Welcome = () => {
             source={require("../../../../assets/Images/Welcome/shape_3.png")}
           />
           <Text style={[styles.titleText, { fontFamily: "Raleway_700Bold" }]}>
-            Start Learning with
+          Bienvenue chez
           </Text>
 
           <Image
@@ -57,23 +57,23 @@ const Welcome = () => {
             source={require("../../../../assets/Images/Welcome/shape_6.png")}
           />
           <Text style={[styles.titleText, { fontFamily: "Raleway_700Bold" }]}>
-            Eduman
+            L'arganier
           </Text>
         </View>
         <View style={styles.dscpWrapper}>
           <Text style={[styles.dscpText, { fontFamily: "Nunito_400Regular" }]}>
-            Explore a variety of interactive lesson,
+            Offrir une éducation de qualité
           </Text>
           <Text style={[styles.dscpText, { fontFamily: "Nunito_400Regular" }]}>
-            video, quizze & assignment.
+             pour un avenir prometteur.
           </Text>
         </View>
         <TouchableOpacity
           style={styles.buttonWrapper}
-          onPress={() => navigation.navigate("Welcome Intro")}
+          onPress={() => navigation.navigate("Login")}
         >
           <Text style={[styles.buttonText, { fontFamily: "Nunito_700Bold" }]}>
-            Getting Started
+             Démarrer
           </Text>
         </TouchableOpacity>
       </View>
@@ -86,7 +86,7 @@ const Welcome = () => {
           style={styles.bachgroundShape5}
           source={require("../../../../assets/Images/Welcome/shape_8.png")}
         />
-        <Image
+         <Image
           style={styles.backgroundImage}
           source={require("../../../../assets/Images/Welcome/welcome_background.png")}
         />

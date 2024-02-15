@@ -57,7 +57,7 @@ const Profile = () => {
 
           <ScrollView>
             <LinearGradient
-              colors={["#216FDE", "#0751BC"]}
+              colors={["#72DE95", "#8af2ac"]}
               end={{ x: 1, y: 0.9 }}
               style={styles.mainBannerContainer}
             >
@@ -108,7 +108,7 @@ const Profile = () => {
                       { fontFamily: "Nunito_600SemiBold" },
                     ]}
                   >
-                    {format(user?.userData?.dateOfBirth, "dd MMMM yyyy", {
+                    {format(user?.userData?.dateOfBirth, "dd MMM yyyy", {
                       locale: fr,
                     })}
                   </Text>

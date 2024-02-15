@@ -8,9 +8,10 @@ const styles = StyleSheet.create({
 
   signInImage: {
     width: "60%",
-    height: 250,
+    height: 150,
     alignSelf: "center",
-    marginTop: 20,
+    marginTop: 60,
+    marginBottom: 30, 
   },
 
   welcomeText: { textAlign: "center", fontSize: 24 },
