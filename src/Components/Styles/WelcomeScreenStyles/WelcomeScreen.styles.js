@@ -13,13 +13,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
+    paddingBottom: 100,
   },
 
   firstContainer: { alignItems: "center", marginTop: 50 },
 
   logo: {
-    width: wp("23%"),
-    height: hp("10%"),
+    width: wp("43%"),
+    height: hp("20%"),
   },
 
   titleText: {

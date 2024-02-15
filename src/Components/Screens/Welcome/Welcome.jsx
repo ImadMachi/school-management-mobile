@@ -86,10 +86,10 @@ const Welcome = () => {
           style={styles.bachgroundShape5}
           source={require("../../../../assets/Images/Welcome/shape_8.png")}
         />
-         <Image
+         {/* <Image
           style={styles.backgroundImage}
           source={require("../../../../assets/Images/Welcome/welcome_background.png")}
-        />
+        /> */}
         <Image
           style={styles.bachgroundShape2}
           source={require("../../../../assets/Images/Welcome/shape_5.png")}

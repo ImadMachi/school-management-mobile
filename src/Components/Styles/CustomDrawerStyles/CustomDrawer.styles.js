@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
     fontSize: textSize,
     color: "white",
   },
-  headerEmail: { fontSize: 16, color: "lightgray" },
+  headerEmail: { fontSize: 15, color: "#e5ecf9" },
   drawerContent: { fontSize: 18, fontWeight: "bold" },
   signOutButton: {
     paddingHorizontal: 15,
