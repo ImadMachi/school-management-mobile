@@ -43,7 +43,7 @@ export const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   submitButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#72DE95",
     borderRadius: 4,
     alignItems: "center",
     paddingVertical: 12,

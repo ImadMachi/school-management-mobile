@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
     paddingTop: 50,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#4C66ED",
+    backgroundColor: "#72DE95",
     paddingBottom: 20,
   },
   headerImage: {
@@ -41,11 +41,11 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 10,
   },
-  signOutText: { color: "#2E86C1" },
+  signOutText: { color: "#72DE95" },
   drawerCloseButton: {
     position: "absolute",
     right: width * 0.13,
-    backgroundColor: "#3498DB",
+    backgroundColor: "#72DE95",
     borderRadius: buttonSize / 1,
     padding: buttonPadding,
     elevation: 5,

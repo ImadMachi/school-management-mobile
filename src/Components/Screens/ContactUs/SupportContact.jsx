@@ -32,7 +32,7 @@ const SupportContact = () => {
 
       <TouchableOpacity style={styles.section}>
         <View style={styles.iconText}>
-          <Feather name="phone-call" size={18} color={"#437CEE"} />
+          <Feather name="phone-call" size={18} color={"#72DE95"} />
           <Text style={[styles.label, { fontFamily: "Nunito_600SemiBold" }]}>
             Téléphone
           </Text>
@@ -44,7 +44,7 @@ const SupportContact = () => {
 
       <TouchableOpacity style={styles.section}>
         <View style={styles.iconText}>
-          <Fontisto name="email" size={18} color={"#437CEE"} />
+          <Fontisto name="email" size={18} color={"#72DE95"} />
           <Text style={[styles.label, { fontFamily: "Raleway_600SemiBold" }]}>
             Email
           </Text>
