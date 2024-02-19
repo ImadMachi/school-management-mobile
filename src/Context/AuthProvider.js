@@ -21,8 +21,8 @@ const AuthProvider = ({ children }) => {
         },
       });
 
-      if (response.data.role !== Student || response.data.role !== Parent) {
-        throw new Error();
+      if (response.data.role !== Student && response.data.role !== Parent) {
+        throw new Error("Invalid user role");
       }
       const userData = modifyUserData(response.data);
 
@@ -34,6 +34,7 @@ const AuthProvider = ({ children }) => {
         ["accessToken", token],
       ]);
     } catch (error) {
+      console.log(error);
       Toast.show("Erreur d'identification", {
         type: "warning",
         placement: "bottom",
@@ -80,6 +81,7 @@ const AuthProvider = ({ children }) => {
   const modifyUserData = (data) => {
     if (data.role === Student) {
       data.userData = JSON.parse(JSON.stringify(data.student));
+      console.log(data.userData);
       delete data.student;
     } else if (data.role === Parent) {
       data.userData = JSON.parse(JSON.stringify(data.parent));

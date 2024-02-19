@@ -51,7 +51,7 @@ const Login = ({ navigation }) => {
       setButtonSpinner(true);
       setRequired("");
       const userData = {
-        email: userInfo.emailOrUserName,
+        email: userInfo.emailOrUserName.toLocaleLowerCase(),
         password: userInfo.password,
       };
       try {
@@ -204,7 +204,7 @@ const Login = ({ navigation }) => {
               <Text style={styles.errorText2}>{error.password}</Text>
             </View>
           )}
-{/* 
+          {/* 
           <TouchableOpacity
             onPress={() => navigation.navigate("Forgot Password")}
           >

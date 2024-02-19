@@ -11,7 +11,9 @@ export async function getMessages(folder: string) {
     );
 
     for (const message of data) {
-      if (message?.sender?.role == Teacher) {
+      if (message?.sender?.role == Director) {
+        message.sender.senderData = message.sender.director;
+      } else if (message?.sender?.role == Teacher) {
         message.sender.senderData = message.sender.teacher;
       } else if (message?.sender?.role == Administrator) {
         message.sender.senderData = message.sender.administrator;

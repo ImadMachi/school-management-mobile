@@ -3,7 +3,6 @@ import AppNavigation from "./src/Navigation/AppNavigation";
 import AuthProvider from "./src/Context/AuthProvider";
 import { StatusBar } from "react-native";
 import "./src/Config/axios-interceptor";
-import HomeNavigation from "./src/Navigation/HomeNavigation";
 
 export default function App() {
   return (
