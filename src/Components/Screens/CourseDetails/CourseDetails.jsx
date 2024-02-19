@@ -29,7 +29,7 @@ import {
   Nunito_400Regular,
   Nunito_500Medium,
   Nunito_700Bold,
-  Nunito_600SemiBold,
+  SemiBold,
 } from "@expo-google-fonts/nunito";
 
 import * as FileSystem from "expo-file-system";
