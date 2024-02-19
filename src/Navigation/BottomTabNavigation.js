@@ -59,13 +59,13 @@ const BottomTabNavigation = () => {
               headerShown: false,
             }}
           />
-          {/* <Tab.Screen
+          <Tab.Screen
             name="Search"
             component={Search}
             options={{
               headerShown: false,
             }}
-          /> */}
+          /> 
           <Tab.Screen
             name="Course"
             component={Course}
