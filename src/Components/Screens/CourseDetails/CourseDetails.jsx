@@ -30,6 +30,7 @@ import {
   Nunito_500Medium,
   Nunito_700Bold,
   SemiBold,
+  Nunito_600SemiBold,
 } from "@expo-google-fonts/nunito";
 
 import * as FileSystem from "expo-file-system";
@@ -106,7 +107,6 @@ downloadFile = async (filepath, filename) => {
 //       successColor: "green",
 //     });
 //   } catch (error) {
-//     console.log("error", error);
 //     Toast.show("échec de Téléchargement du fichier", {
 //       type: "warning",
 //       placement: "bottom",
@@ -138,6 +138,12 @@ const MessageDetails = () => {
   if (!fontsLoaded && !fontError) {
     return null;
   }
+
+  useEffect(() => {
+    if (messageDetails.attachments.length == 0) {
+      setActiveButton("Message");
+    }
+  }, [messageDetails]);
 
   return (
     <>
@@ -233,7 +239,7 @@ const MessageDetails = () => {
             <View style={styles.buttonPressedContainer}>
               <View style={styles.reviewTopWrap}>
                 {messageDetails.attachments.map((attachment) => {
-                  const fileExtension = attachment.filename
+                  const fileExtension = attachment.filepath
                     .split(".")
                     .pop()
                     ?.toLowerCase();

@@ -60,8 +60,6 @@ export async function sendMessage(data: sendMessageProps) {
       animationType: "zoom-in",
     });
   } catch (error) {
-    console.log(error.message);
-
     Toast.show("Erreur lors de l'envoi du message", {
       type: "danger",
       placement: "bottom",

@@ -64,9 +64,9 @@ const Login = ({ navigation }) => {
       } catch (e) {
         if (
           axios.isAxiosError(e) &&
-          (e.response.status === 400 ||
-            e.response.status === 404 ||
-            e.response.status === 401)
+          (e.response?.status === 400 ||
+            e.response?.status === 404 ||
+            e.response?.status === 401)
         ) {
           Toast.show("Identifiants invalides", {
             type: "warning",

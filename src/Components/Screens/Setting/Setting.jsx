@@ -29,7 +29,6 @@ const Setting = () => {
     const firstName = profileInfo.firstName;
     const lastName = profileInfo.lastName;
     const email = profileInfo.email;
-    console.log(firstName, lastName, email);
     if (firstName && lastName && email) {
       setError("");
       Toast.show("Modifications suggérées avec succès", {

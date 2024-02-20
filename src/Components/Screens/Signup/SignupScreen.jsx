@@ -83,9 +83,7 @@ const SignupScreen = ({ navigation }) => {
             successColor: "#1988FF",
           });
         }
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
     } else {
       setRequired("Fill Up The All Required Field");
     }
