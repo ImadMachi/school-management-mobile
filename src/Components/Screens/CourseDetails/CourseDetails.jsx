@@ -126,6 +126,12 @@ const MessageDetails = () => {
     setActiveButton(buttonName);
   };
 
+  useEffect(() => {
+    if (messageDetails.attachments.length == 0) {
+      setActiveButton("Message");
+    }
+  }, [messageDetails.attachments.length]);
+
   let [fontsLoaded, fontError] = useFonts({
     Raleway_600SemiBold,
     Raleway_700Bold,
@@ -138,12 +144,6 @@ const MessageDetails = () => {
   if (!fontsLoaded && !fontError) {
     return null;
   }
-
-  useEffect(() => {
-    if (messageDetails.attachments.length == 0) {
-      setActiveButton("Message");
-    }
-  }, [messageDetails]);
 
   return (
     <>
@@ -252,6 +252,16 @@ const MessageDetails = () => {
                           downloadFile(attachment.filepath, attachment.filename)
                         }
                       >
+                        <View style={styles.attachmentLinkWrapper}>
+                          <Entypo
+                            name="image-inverted"
+                            size={16}
+                            color={"gray"}
+                          />
+                          <Text style={styles.attachmentLink}>
+                            {attachment.filename}
+                          </Text>
+                        </View>
                         <Image
                           style={styles.attachmentImage}
                           key={attachment.id}
