@@ -28,6 +28,13 @@ export const styles = StyleSheet.create({
     fontSize: 22,
   },
 
+  divider: {
+    backgroundColor: "#E1E9F8",
+    marginHorizontal: 16,
+    marginTop: 16,
+    height: 1,
+  },
+
   instructorContainer: {
     flexDirection: "row",
     alignItems: "center",

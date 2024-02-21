@@ -39,6 +39,7 @@ import * as MediaLibrary from "expo-media-library";
 import CustomBackHeader from "../../Custom/CustomBackHeader";
 import { BASE_URL } from "../../Utils/BASE_URL";
 import { Toast } from "react-native-toast-notifications";
+import { Divider } from "react-native-paper";
 
 const IMAGE_EXTENSIONS = [
   "png",
@@ -183,6 +184,9 @@ const MessageDetails = () => {
               </Text>
             </View>
           </View>
+          {messageDetails.attachments.length == 0 && (
+            <View style={styles.divider} />
+          )}
 
           {messageDetails.attachments.length > 0 && (
             <View style={styles.buttonGroupContainer}>
