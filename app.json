@@ -6,14 +6,26 @@
     "orientation": "portrait",
     "icon": "./assets/icon2.png",
     "userInterfaceStyle": "light",
+    "notification": {
+      "icon": "./assets/icon2.png",
+      "color": "#ffffff"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon2.png",
+          "color": "#000000",
+          "sounds": ["./assets/mixkit-magic-marimba-2820.wav"]
+        }
+      ]
+    ],
     "splash": {
       "image": "./assets/splash2.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },

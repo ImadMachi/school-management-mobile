@@ -1,4 +1,4 @@
-import React, { memo, useContext, useEffect, useState } from "react";
+import React, { memo, useContext, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   FlatList,
   Image,
 } from "react-native";
-import { AntDesign, Ionicons, FontAwesome } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { searchAndFilteringData } from "../../Data/SearchAndFilteringData";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
@@ -18,13 +18,27 @@ import AnimatedLoading from "../../Shared/AnimatedLoading/AnimatedLoading";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts, Raleway_700Bold } from "@expo-google-fonts/raleway";
 import { Nunito_600SemiBold, Nunito_700Bold } from "@expo-google-fonts/nunito";
+import * as Notifications from "expo-notifications";
+
 import Colors from "../../Utils/Color";
 import CustomDrawerHeader from "../../Custom/CustomDrawerHeader";
 import { AuthContext } from "../../../Context/AuthProvider";
-import { getMessages } from "../../../services/messages";
+import { getMessages, getNewMessages } from "../../../services/messages";
 import { folders } from "../../../Constants/folders";
 import { BASE_URL } from "../../Utils/BASE_URL";
 import { formatMessageDate } from "../../../Utils/format-message-date";
+import {
+  registerForPushNotificationsAsync,
+  schedulePushNotification,
+} from "../../../Utils/notifications";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const MessageItem = memo(({ item, handleMessageDetails }) => {
   return (
@@ -68,23 +82,49 @@ const MessageItem = memo(({ item, handleMessageDetails }) => {
   );
 });
 
+function useInterval(callback, delay) {
+  const savedCallback = useRef();
+
+  // Remember the latest callback.
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Set up the interval.
+  useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+
 const Home = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [checked, setChecked] = useState("");
   const [allMessages, setAllMessages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const navigation = useNavigation();
+  const [timestamp, setTimestamp] = useState(new Date().toISOString());
+  const [filterText, setFilterText] = useState("");
 
-  const { user } = useContext(AuthContext);
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  const navigation = useNavigation();
 
   const handlePaymentOptionPress = (value) => {
     setChecked(value);
   };
 
-  const searchFilter = (text) => {
+  const searchFilter = (text, data = allMessages) => {
     if (text.trim() === "") {
-      setMessages(allMessages);
+      setMessages(data);
       return;
     }
 
@@ -131,6 +171,56 @@ const Home = () => {
     })();
   }, []);
 
+  useInterval(async () => {
+    let newMessages = (await getNewMessages(timestamp)) || [];
+    setTimestamp(new Date(Date.now() - 10000).toISOString());
+    if (newMessages.length > 0) {
+      console.log(newMessages);
+      const filteredMessages = newMessages.filter(
+        (message) =>
+          !allMessages.find((oldMessage) => oldMessage.id === message.id)
+      );
+      setAllMessages([...filteredMessages, ...allMessages]);
+      setMessages([...filteredMessages, ...allMessages]);
+
+      for (message of filteredMessages) {
+        const fullName =
+          message.sender.senderData.firstName +
+          " " +
+          message.sender.senderData.lastName;
+        schedulePushNotification(fullName, message.subject);
+      }
+    }
+    newMessages = [];
+  }, 15000);
+
+  useEffect(() => {
+    searchFilter(filterText);
+  }, [filterText]);
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
+
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
   let [fontsLoaded, fontError] = useFonts({
     Raleway_700Bold,
     Nunito_600SemiBold,
@@ -165,7 +255,7 @@ const Home = () => {
                   style={[styles.input, { fontFamily: "Nunito_700Bold" }]}
                   placeholder="Rechercher"
                   placeholderTextColor={Colors.NEUTRAL.NEUTRAL_SHADOW_MOUNTAIN}
-                  onChangeText={(text) => searchFilter(text)}
+                  onChangeText={(text) => setFilterText(text)}
                 />
               </TouchableOpacity>
               <TouchableOpacity
@@ -186,6 +276,7 @@ const Home = () => {
                 renderItem={({ item }) => (
                   <MessageItem
                     item={item}
+                    key={item.id}
                     handleMessageDetails={handleMessageDetails}
                   />
                 )}
