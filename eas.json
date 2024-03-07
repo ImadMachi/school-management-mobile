@@ -5,7 +5,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_BASE_URL": "https://school-management-backend-75d4fa160409.herokuapp.com"
+        "EXPO_PUBLIC_BASE_URL": "https://school-management-759fee29660f.herokuapp.com"
       }
     },
     "production": {}

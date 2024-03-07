@@ -9,11 +9,12 @@ import {
   Image,
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { searchAndFilteringData } from "../../Data/SearchAndFilteringData";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
 import { RadioButton } from "react-native-paper";
 import { styles } from "../../Styles/SearchScreenStyles/SearchScreen.styles";
+import { styles as childrenSliderStyles } from "../../Styles/CourseScreenStyles/CourseScreen.styles";
+
 import AnimatedLoading from "../../Shared/AnimatedLoading/AnimatedLoading";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts, Raleway_700Bold } from "@expo-google-fonts/raleway";
@@ -23,7 +24,11 @@ import * as Notifications from "expo-notifications";
 import Colors from "../../Utils/Color";
 import CustomDrawerHeader from "../../Custom/CustomDrawerHeader";
 import { AuthContext } from "../../../Context/AuthProvider";
-import { getMessages, getNewMessages } from "../../../services/messages";
+import {
+  getMessages,
+  getNewMessages,
+  getStudentMessagesByParentId,
+} from "../../../services/messages";
 import { folders } from "../../../Constants/folders";
 import { BASE_URL } from "../../Utils/BASE_URL";
 import { formatMessageDate } from "../../../Utils/format-message-date";
@@ -31,6 +36,8 @@ import {
   registerForPushNotificationsAsync,
   schedulePushNotification,
 } from "../../../Utils/notifications";
+import { getCategories } from "../../../services/categories";
+import { Parent } from "../../../Constants/userRoles";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -104,12 +111,15 @@ function useInterval(callback, delay) {
 
 const Home = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [checked, setChecked] = useState("");
+  const [categries, setCategries] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [allMessages, setAllMessages] = useState([]);
+  const [childrenMessages, setChildrenMessages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [timestamp, setTimestamp] = useState(new Date().toISOString());
   const [filterText, setFilterText] = useState("");
+  const [activeChild, setActiveChild] = useState("Moi");
 
   const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] = useState(false);
@@ -118,17 +128,32 @@ const Home = () => {
 
   const navigation = useNavigation();
 
-  const handlePaymentOptionPress = (value) => {
-    setChecked(value);
-  };
+  const { user, isLoading: isLoadingAuthUser } = useContext(AuthContext);
 
-  const searchFilter = (text, data = allMessages) => {
+  const searchFilter = ({ text, category, childName, data = allMessages }) => {
+    let searchList = [];
+    if (!childName || childName == "Moi") {
+      searchList = data;
+    } else {
+      const child = childrenMessages.find(
+        (child) => child.studentData.student.firstName === childName
+      );
+      searchList = child.messages;
+    }
+
+    if (category) {
+      searchList = searchList.filter(
+        (item) =>
+          item.category.slug.toLowerCase().indexOf(category.toLowerCase()) > -1
+      );
+      setMessages(searchList);
+    }
     if (text.trim() === "") {
-      setMessages(data);
+      setMessages(searchList);
       return;
     }
 
-    let searchList = allMessages.filter((item) => {
+    searchList = searchList.filter((item) => {
       const matchSender =
         item.sender?.senderData?.firstName
           ?.toLowerCase()
@@ -151,13 +176,35 @@ const Home = () => {
   };
 
   const handleMessageDetails = (messageDetails) => {
-    navigation.navigate("Course Details", {
+    navigation.navigate("Message Details", {
       messageDetails,
     });
   };
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
+  };
+
+  const handleChildChipPress = (childName) => {
+    setActiveChild(childName);
+    if (childName === "Moi") {
+      searchFilter({
+        text: filterText,
+        category: selectedCategory,
+        data: allMessages,
+        childName,
+      });
+    } else {
+      const child = childrenMessages.find(
+        (child) => child.studentData.student.firstName === childName
+      );
+      searchFilter({
+        text: filterText,
+        category: selectedCategory,
+        data: child.messages,
+        childName,
+      });
+    }
   };
 
   useEffect(() => {
@@ -167,15 +214,42 @@ const Home = () => {
         setAllMessages(data);
         setMessages(data);
       }
-      setIsLoading(false);
     })();
+
+    (async () => {
+      const data = await getCategories();
+      if (data) {
+        setCategries(data);
+      }
+    })();
+
+    (async () => {
+      if (user.role == Parent) {
+        const data = await getStudentMessagesByParentId(user.userData.id);
+        setChildrenMessages(data);
+      }
+    })();
+
+    setIsLoading(false);
   }, []);
+
+  // useEffect(() => {
+  //   if (user.role == Parent) {
+  //     navigation.navigate("Home Page Parent");
+  //   }
+  // }, [user]);
+
+  useEffect(() => {
+    searchFilter({
+      text: filterText,
+      category: selectedCategory,
+    });
+  }, [selectedCategory, filterText]);
 
   useInterval(async () => {
     let newMessages = (await getNewMessages(timestamp)) || [];
     setTimestamp(new Date(Date.now() - 10000).toISOString());
     if (newMessages.length > 0) {
-      console.log(newMessages);
       const filteredMessages = newMessages.filter(
         (message) =>
           !allMessages.find((oldMessage) => oldMessage.id === message.id)
@@ -193,10 +267,6 @@ const Home = () => {
     }
     newMessages = [];
   }, 15000);
-
-  useEffect(() => {
-    searchFilter(filterText);
-  }, [filterText]);
 
   useEffect(() => {
     registerForPushNotificationsAsync().then((token) =>
@@ -227,7 +297,7 @@ const Home = () => {
     Nunito_700Bold,
   });
 
-  if (!fontsLoaded && !fontError) {
+  if (!fontsLoaded && !fontError && isLoadingAuthUser && isLoading) {
     return null;
   }
 
@@ -269,10 +339,55 @@ const Home = () => {
                 />
               </TouchableOpacity>
             </View>
+
             <View style={{ marginTop: 16, paddingBottom: 110 }}>
+              {user.role == Parent && (
+                <FlatList
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                  data={[
+                    { id: 0, student: { firstName: "Moi" } },
+                    ...childrenMessages.map((child) => child.studentData),
+                  ]}
+                  keyExtractor={(item) => item.id.toString()}
+                  style={{ marginHorizontal: 16 }}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={[
+                        childrenSliderStyles.categorySlideContainer,
+                        {
+                          backgroundColor:
+                            activeChild === item.student.firstName
+                              ? "rgba(36, 103, 236, 0.15)"
+                              : "white",
+                        },
+                      ]}
+                      onPress={() =>
+                        handleChildChipPress(item.student.firstName)
+                      }
+                    >
+                      <Text
+                        style={[
+                          childrenSliderStyles.categoryText,
+                          {
+                            color:
+                              activeChild === item.student.firstName
+                                ? Colors.PRIMARY.PRIMARY_RETRO_BLUE
+                                : "black",
+                            fontFamily: "Nunito_500Medium",
+                          },
+                        ]}
+                      >
+                        {item.student.firstName}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              )}
               <FlatList
                 data={messages}
                 keyExtractor={(item) => item.id.toString()}
+                contentContainerStyle={{ paddingBottom: 50 }}
                 renderItem={({ item }) => (
                   <MessageItem
                     item={item}
@@ -281,6 +396,15 @@ const Home = () => {
                   />
                 )}
               />
+              {messages.length === 0 && (
+                <View style={styles.noMessagesContainer}>
+                  <Text style={styles.noMessagesText}>Aucun message</Text>
+                  <Image
+                    source={require("../../../../assets/Images/empty-inbox.png")}
+                    style={styles.noMessagesImage}
+                  />
+                </View>
+              )}
             </View>
           </SafeAreaView>
 
@@ -294,106 +418,38 @@ const Home = () => {
               </TouchableOpacity>
             </View>
             <View style={styles.modalContent}>
-              <TouchableOpacity
-                style={styles.modalContentButton}
-                onPress={() => {
-                  let tempList = searchAndFilteringData.sort((a, b) =>
-                    a.title > b.title ? 1 : -1
-                  );
-                  setMessages(tempList);
-                  handlePaymentOptionPress("Sort By Name"), toggleModal();
-                }}
-              >
-                <Text>Sort By Name</Text>
-                <RadioButton
+              <Text style={styles.modalContentTitle}>Trier par catégories</Text>
+              {categries.map((category) => (
+                <TouchableOpacity
+                  style={styles.modalContentButton}
                   onPress={() => {
-                    let tempList = searchAndFilteringData.sort((a, b) =>
-                      a.title > b.title ? 1 : -1
-                    );
-                    setMessages(tempList);
-                    handlePaymentOptionPress("Sort By Name"), toggleModal();
+                    if (selectedCategory == category.slug) {
+                      setSelectedCategory("");
+                    } else {
+                      setSelectedCategory(category.slug);
+                    }
+                    toggleModal();
                   }}
-                  value="Sort By Name"
-                  status={checked === "Sort By Name" ? "checked" : "unchecked"}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalContentButton}
-                onPress={() => {
-                  let temtList = searchAndFilteringData.sort(
-                    (a, b) => a.price - b.price
-                  );
-                  setMessages(temtList);
-                  handlePaymentOptionPress("Low To High Price"), toggleModal();
-                }}
-              >
-                <Text>Low To High Price</Text>
-                <RadioButton
-                  onPress={() => {
-                    let temtList = searchAndFilteringData.sort(
-                      (a, b) => a.price - b.price
-                    );
-                    setMessages(temtList);
-                    handlePaymentOptionPress("Low To High Price"),
+                >
+                  <Text>{category.name}</Text>
+                  <RadioButton
+                    onPress={() => {
+                      if (selectedCategory == category.slug) {
+                        setSelectedCategory("");
+                      } else {
+                        setSelectedCategory(category.slug);
+                      }
                       toggleModal();
-                  }}
-                  value="Low To High Price"
-                  status={
-                    checked === "Low To High Price" ? "checked" : "unchecked"
-                  }
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalContentButton}
-                onPress={() => {
-                  let temtList = searchAndFilteringData.sort(
-                    (a, b) => b.price - a.price
-                  );
-                  setMessages(temtList);
-                  handlePaymentOptionPress("High To Low Price"), toggleModal();
-                }}
-              >
-                <Text>High To Low Price</Text>
-                <RadioButton
-                  onPress={() => {
-                    let temtList = searchAndFilteringData.sort(
-                      (a, b) => b.price - a.price
-                    );
-                    setMessages(temtList);
-                    handlePaymentOptionPress("High To Low Price"),
-                      toggleModal();
-                  }}
-                  value="High To Low Price"
-                  status={
-                    checked === "High To Low Price" ? "checked" : "unchecked"
-                  }
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalContentButton}
-                onPress={() => {
-                  let temtList = searchAndFilteringData.sort(
-                    (a, b) => b.ratingAve - a.ratingAve
-                  );
-                  setMessages(temtList);
-                  handlePaymentOptionPress("Sort By Rating"), toggleModal();
-                }}
-              >
-                <Text>Sort By Rating</Text>
-                <RadioButton
-                  onPress={() => {
-                    let temtList = searchAndFilteringData.sort(
-                      (a, b) => b.ratingAve - a.ratingAve
-                    );
-                    setMessages(temtList);
-                    handlePaymentOptionPress("Sort By Rating"), toggleModal();
-                  }}
-                  value="Sort By Rating"
-                  status={
-                    checked === "Sort By Rating" ? "checked" : "unchecked"
-                  }
-                />
-              </TouchableOpacity>
+                    }}
+                    value="Sort By Name"
+                    status={
+                      selectedCategory == category.slug
+                        ? "checked"
+                        : "unchecked"
+                    }
+                  />
+                </TouchableOpacity>
+              ))}
             </View>
           </Modal>
         </LinearGradient>

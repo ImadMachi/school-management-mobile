@@ -26,4 +26,5 @@ export type Message = {
   folder: (typeof folders)[keyof typeof folders];
   attachments: AttachmentType[];
   category: Category;
+  isRead: boolean;
 };

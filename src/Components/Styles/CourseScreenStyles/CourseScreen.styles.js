@@ -71,12 +71,12 @@ export const styles = StyleSheet.create({
   categorySlideWrapper: { marginHorizontal: 16 },
 
   categorySlideContainer: {
-    marginTop: 16,
-    marginHorizontal: 6,
+    marginRight: 4,
     backgroundColor: "#FFFF",
-    paddingVertical: 12,
-    paddingHorizontal: 22,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
     borderRadius: 50,
+    marginBottom: 12,
   },
 
   categoryText: { color: Colors.NEUTRAL.NEUTRAL_SHADOW_MOUNTAIN, fontSize: 15 },

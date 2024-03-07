@@ -23,14 +23,15 @@ const CustomDrawer = (props) => {
     return null;
   }
 
-  const { width } = Dimensions.get("window");
-  const buttonSize = width * 0.1;
-
   return (
     <LinearGradient colors={["#E5ECF9", "#F6F7F9"]} style={styles.container}>
       <View style={styles.header}>
         <Image
-          source={require("../../../assets/Images/student-avatar.png")}
+          source={
+            user.profileImage
+              ? { uri: `${BASE_URL}/uploads/profileImage/${user.profileImage}` }
+              : require("../../../assets/Images/student-avatar.png")
+          }
           style={styles.headerImage}
         />
         <View style={styles.textContainer}>

@@ -105,6 +105,13 @@ export const styles = StyleSheet.create({
     marginTop: 3,
     marginLeft: 1,
   },
+
+  modalContentTitle: {
+    fontSize: 18,
+    marginBottom: 6,
+    fontWeight: "bold",
+  },
+
   modalContentButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -117,4 +124,21 @@ export const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   modalClose: { position: "relative", alignSelf: "center", marginVertical: 50 },
+
+  noMessagesContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noMessagesText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "gray",
+  },
+  noMessagesImage: {
+    width: 200,
+    height: 150,
+    objectFit: "contain",
+    marginTop: 20,
+  },
 });

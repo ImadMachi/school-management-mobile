@@ -42,7 +42,6 @@ const AppStack = () => {
     >
       <Drawer.Screen
         name="Home Page"
-        // component={BottomTabNavigation}
         component={Home}
         options={{
           drawerIcon: () => <Entypo name="home" size={22} color={"gray"} />,
@@ -93,7 +92,7 @@ const AppStack = () => {
       />
 
       <Drawer.Screen
-        name="Course Details"
+        name="Message Details"
         component={CourseDetails}
         options={{
           headerShown: false,

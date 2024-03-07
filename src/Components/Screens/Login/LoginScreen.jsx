@@ -87,7 +87,7 @@ const Login = ({ navigation }) => {
         setButtonSpinner(false);
       }
     } else {
-      setRequired("Fill Up The All Required Field");
+      setRequired("Vueillez remplir tous les champs");
     }
   };
 
@@ -98,7 +98,7 @@ const Login = ({ navigation }) => {
     if (!passwordSixValue.test(password)) {
       setError({
         ...error,
-        password: "Write at least 6 characters",
+        password: "Le mot de passe doit contenir au moins 6 caractères",
       });
       setUserInfo({ ...userInfo, password: "" });
     } else {

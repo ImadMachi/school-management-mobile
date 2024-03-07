@@ -8,12 +8,16 @@ function mapUserData(data: any) {
   for (const message of data) {
     if (message?.sender?.role == Director) {
       message.sender.senderData = message.sender.director;
+      delete message.sender.director;
     } else if (message?.sender?.role == Teacher) {
       message.sender.senderData = message.sender.teacher;
+      delete message.sender.teacher;
     } else if (message?.sender?.role == Administrator) {
       message.sender.senderData = message.sender.administrator;
+      delete message.sender.administrator;
     } else if (message?.sender?.role == Director) {
       message.sender.senderData = message.sender.administrator;
+      delete message.sender.administrator;
     }
   }
 }
@@ -86,6 +90,27 @@ export async function getNewMessages(timestamp: string) {
   } catch (error) {
     Toast.show("Erreur lors de la récupération des nouveaux messages", {
       type: "warning",
+      placement: "bottom",
+      duration: 2000,
+      animationType: "zoom-in",
+      successColor: "red",
+    });
+  }
+}
+
+export async function getStudentMessagesByParentId(parentId: number) {
+  try {
+    const { data } = await axios.get(
+      `${BASE_URL}/messages/parent/${parentId}/students`
+    );
+
+    for (const studentData of data) {
+      mapUserData(studentData.messages);
+    }
+    return data as Message[];
+  } catch (error) {
+    Toast.show("Erreur lors de la récupération des messages", {
+      type: "danger",
       placement: "bottom",
       duration: 2000,
       animationType: "zoom-in",
