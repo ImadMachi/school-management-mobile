@@ -10,6 +10,7 @@ import { styles } from "../Styles/CustomDrawerStyles/CustomDrawer.styles";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts, Raleway_700Bold } from "@expo-google-fonts/raleway";
 import { Nunito_600SemiBold } from "@expo-google-fonts/nunito";
+import { BASE_URL } from "../Utils/BASE_URL";
 
 const CustomDrawer = (props) => {
   const { logout, user } = useContext(AuthContext);
@@ -29,7 +30,9 @@ const CustomDrawer = (props) => {
         <Image
           source={
             user.profileImage
-              ? { uri: `${BASE_URL}/uploads/profileImage/${user.profileImage}` }
+              ? {
+                  uri: `${BASE_URL}/uploads/${user.profileImage}`,
+                }
               : require("../../../assets/Images/student-avatar.png")
           }
           style={styles.headerImage}
