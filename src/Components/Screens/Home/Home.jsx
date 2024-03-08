@@ -243,6 +243,7 @@ const Home = () => {
     searchFilter({
       text: filterText,
       category: selectedCategory,
+      childName: activeChild,
     });
   }, [selectedCategory, filterText]);
 
@@ -358,7 +359,7 @@ const Home = () => {
                         {
                           backgroundColor:
                             activeChild === item.student.firstName
-                              ? "rgba(36, 103, 236, 0.15)"
+                              ? "rgba(160, 250, 236, 0.15)"
                               : "white",
                         },
                       ]}
