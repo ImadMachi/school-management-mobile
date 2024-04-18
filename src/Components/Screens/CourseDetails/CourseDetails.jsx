@@ -19,7 +19,7 @@ import {
 
 import { styles } from "../../Styles/CoursesScreenStyles/CourseDetailsScreen.styles";
 import { LinearGradient } from "expo-linear-gradient";
-
+import { Audio } from "expo-av";
 import {
   useFonts,
   Raleway_600SemiBold,
@@ -33,13 +33,9 @@ import {
   Nunito_600SemiBold,
 } from "@expo-google-fonts/nunito";
 
-import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from "expo-media-library";
-
 import CustomBackHeader from "../../Custom/CustomBackHeader";
 import { BASE_URL } from "../../Utils/BASE_URL";
-import { Toast } from "react-native-toast-notifications";
-import { Divider } from "react-native-paper";
+import { set } from "date-fns";
 
 const IMAGE_EXTENSIONS = [
   "png",
@@ -53,79 +49,83 @@ const IMAGE_EXTENSIONS = [
   "tiff",
 ];
 
+const AUDIO_EXTENSIONS = ["wav"];
+
 downloadFile = async (filepath, filename) => {
   const url = `${BASE_URL}/uploads/attachments/${filepath}`;
   Linking.openURL(url);
 };
 
-// async function downloadFile(filepath, filename) {
-//   const url = `${BASE_URL}/uploads/attachments/${filepath}`;
-//   try {
-//     const dirInfo = await FileSystem.getInfoAsync(
-//       FileSystem.documentDirectory + "Arganier/"
-//     );
-//     if (!dirInfo.exists) {
-//       await FileSystem.makeDirectoryAsync(
-//         FileSystem.documentDirectory + "Arganier/",
-//         { intermediates: true }
-//       );
-//     }
-//     const downloadResumable = FileSystem.createDownloadResumable(
-//       url,
-//       FileSystem.documentDirectory + "Arganier/" + filename
-//     );
-//     const { uri } = await downloadResumable.downloadAsync();
-
-//     // ask for permission to access the media library
-//     const { granted } = await MediaLibrary.requestPermissionsAsync();
-
-//     await FileSystem.StorageAccessFramework.moveAsync({
-//       from: uri,
-//       to: FileSystem.documentDirectory + "Arganier/" + filename,
-//     });
-
-//     if (!granted) {
-//       Toast.show("L'autorisation d'accès au système de fichiers est requise.", {
-//         type: "warning",
-//         placement: "bottom",
-//         duration: 2000,
-//         animationType: "zoom-in",
-//         successColor: "red",
-//       });
-//       return;
-//     }
-
-//     const asset = await MediaLibrary.createAssetAsync(uri);
-//     await MediaLibrary.createAlbumAsync("Arganier", asset, false);
-//     await MediaLibrary.getAssetInfoAsync(asset);
-//     await MediaLibrary.openAssetAsync(asset);
-
-//     Toast.show("Fichier téléchargé avec succès", {
-//       type: "success",
-//       placement: "bottom",
-//       duration: 2000,
-//       animationType: "zoom-in",
-//       successColor: "green",
-//     });
-//   } catch (error) {
-//     Toast.show("échec de Téléchargement du fichier", {
-//       type: "warning",
-//       placement: "bottom",
-//       duration: 2000,
-//       animationType: "zoom-in",
-//       successColor: "red",
-//     });
-//   }
-// }
-
 const MessageDetails = () => {
   const [activeButton, setActiveButton] = useState("Message");
+  const [currentAudio, setCurrentAudio] = useState(null);
+
   const router = useRoute();
   const { messageDetails } = router.params;
 
   const handleButtonPress = (buttonName) => {
     setActiveButton(buttonName);
   };
+
+  const navigation = useNavigation();
+
+  const playAudio = async (attachment) => {
+    if (currentAudio?.filename == attachment.filename && currentAudio?.sound) {
+      if (JSON.parse(currentAudio.sound?._lastStatusUpdate)?.isPlaying) {
+        await currentAudio.sound.pauseAsync();
+        setCurrentAudio({ ...currentAudio, isPlaying: false });
+        return;
+      } else {
+        await currentAudio.sound.playAsync();
+        setCurrentAudio({ ...currentAudio, isPlaying: true });
+        return;
+      }
+    }
+    await currentAudio?.sound?.pauseAsync();
+    await currentAudio?.sound?.unloadAsync();
+    setCurrentAudio(null);
+    const audioFile = `${BASE_URL}/uploads/attachments/${attachment.filepath}`;
+    const { sound } = await Audio.Sound.createAsync({ uri: audioFile });
+    setCurrentAudio({
+      filename: attachment.filename,
+      sound,
+      isPlaying: true,
+    });
+    sound.playAsync().then((playbackStatus) => {
+      sound.setOnPlaybackStatusUpdate((playbackStatus) => {
+        const durationMillis = playbackStatus.durationMillis;
+        const durationSeconds = durationMillis / 1000;
+        const durationMinutes = Math.floor(durationSeconds / 60);
+        const remainingSeconds = Math.floor(durationSeconds % 60);
+
+        const positionMillis = playbackStatus.positionMillis;
+        const positionSeconds = positionMillis / 1000;
+        const positionMinutes = Math.floor(positionSeconds / 60);
+        const positionRemainingSeconds = Math.floor(positionSeconds % 60);
+        setCurrentAudio((curr) => ({
+          ...curr,
+          duration: {
+            minutes: durationMinutes,
+            seconds: remainingSeconds,
+          },
+          position: {
+            minutes: positionMinutes,
+            seconds: positionRemainingSeconds,
+          },
+        }));
+        if (playbackStatus.didJustFinish) {
+          setCurrentAudio(null);
+        }
+      });
+    });
+  };
+  useEffect(() => {
+    if (currentAudio?.sound) {
+      currentAudio.sound.pauseAsync();
+      currentAudio.sound.unloadAsync();
+      setCurrentAudio(null);
+    }
+  }, []);
 
   useEffect(() => {
     if (messageDetails.attachments.length == 0) {
@@ -183,6 +183,34 @@ const MessageDetails = () => {
                 {messageDetails.sender.senderData.lastName}
               </Text>
             </View>
+            <View style={styles.instructorNameWrap}>
+              <TouchableOpacity
+                style={{ display: "flex", flexDirection: "row" }}
+                onPress={() => {
+                  navigation.navigate("ReplyToMessage", {
+                    replyData: {
+                      recipientName:
+                        messageDetails.sender.senderData.firstName +
+                        " " +
+                        messageDetails.sender.senderData.lastName,
+                      parentMessageId: messageDetails.id,
+                      categoryId: messageDetails.category.id,
+                      recipientId: messageDetails.sender.senderData.id,
+                    },
+                  });
+                }}
+              >
+                <FontAwesome name="reply" size={18} color={"#8A8A8A"} />
+                <Text
+                  style={[
+                    styles.instructorNameText,
+                    { fontFamily: "Nunito_500Medium", marginLeft: 5 },
+                  ]}
+                >
+                  Répondre
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
           {messageDetails.attachments.length == 0 && (
             <View style={styles.divider} />
@@ -236,6 +264,69 @@ const MessageDetails = () => {
           )}
           {activeButton === "Message" && (
             <View style={styles.buttonPressedContainer}>
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  marginBottom: 15,
+                  flexWrap: "wrap",
+                }}
+              >
+                {messageDetails.attachments.map((attachment) => {
+                  const fileExtension = attachment.filepath
+                    .split(".")
+                    .pop()
+                    ?.toLowerCase();
+
+                  if (AUDIO_EXTENSIONS.includes(fileExtension)) {
+                    return (
+                      <TouchableOpacity
+                        key={attachment.id}
+                        onPress={() => {
+                          playAudio(attachment);
+                        }}
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          backgroundColor: "rgba(0,0,0,0.1)",
+                          margin: 5,
+                          paddingVertical: 2,
+                          paddingHorizontal: 7,
+                          borderRadius: 5,
+                        }}
+                      >
+                        {currentAudio?.filename == attachment.filename &&
+                        currentAudio?.isPlaying ? (
+                          <Entypo
+                            name="controller-paus"
+                            size={24}
+                            color={"gray"}
+                            style={{ marginRight: 10 }}
+                          />
+                        ) : (
+                          <Entypo
+                            name="controller-play"
+                            size={30}
+                            color={"gray"}
+                            style={{ marginRight: 10 }}
+                          />
+                        )}
+                        {currentAudio?.filename == attachment.filename && (
+                          <Text>
+                            {currentAudio?.position?.minutes}:
+                            {currentAudio?.position?.seconds} /{" "}
+                            {currentAudio?.duration?.minutes}:
+                            {currentAudio?.duration?.seconds}
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  } else {
+                    return;
+                  }
+                })}
+              </View>
               <Text>{messageDetails.body}</Text>
             </View>
           )}
@@ -248,7 +339,9 @@ const MessageDetails = () => {
                     .pop()
                     ?.toLowerCase();
 
-                  if (IMAGE_EXTENSIONS.includes(fileExtension)) {
+                  if (AUDIO_EXTENSIONS.includes(fileExtension)) {
+                    return;
+                  } else if (IMAGE_EXTENSIONS.includes(fileExtension)) {
                     return (
                       <TouchableOpacity
                         key={attachment.id}

@@ -46,6 +46,24 @@ export const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: Colors.NEUTRAL.NEUTRAL_WHITE,
     borderRadius: 4,
+    position: "relative",
+  },
+  badge: {
+    position: "absolute",
+    top: 3,
+    left: 3,
+    backgroundColor: Colors.PRIMARY.PRIMARY_RETRO_BLUE, // Set badge color
+    width: 7, // Set badge width
+    height: 7, // Set badge height
+    borderRadius: 5, // Set badge border radius to make it circular
+  },
+  countBadge: {
+    position: "absolute",
+    top: -1,
+    right: 2,
+    fontSize: 10,
+    color: Colors.PRIMARY.PRIMARY_RETRO_BLUE,
+    fontWeight: "bold",
   },
   messageItem: {
     flexDirection: "row",

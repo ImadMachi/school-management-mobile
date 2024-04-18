@@ -41,9 +41,7 @@ const OrderHistory = () => {
           JSON.stringify(updatedPurchaseItem)
         );
       }
-    } catch (error) {
-      console.error("Error deleting course from AsyncStorage", error);
-    }
+    } catch (error) {}
   };
 
   const handleCourseDetails = (course) => {
@@ -61,7 +59,6 @@ const OrderHistory = () => {
         setCourses(purchaseItem);
       }
     } catch (error) {
-      console.error("Error Retrieving Data", error);
     } finally {
       setIsRefreshing(false);
     }

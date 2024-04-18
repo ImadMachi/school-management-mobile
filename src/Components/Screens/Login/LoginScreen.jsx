@@ -159,6 +159,9 @@ const Login = ({ navigation }) => {
         >
           <Text>Etudiant: lahlou@gmail.com</Text>
           <Text>Parent: lahlou.parent@gmail.com</Text>
+          <Text>Enseignant: rahim.enseignant@gmail.com</Text>
+          <Text>Agent: mohsin.agent@gmail.com</Text>
+
           <Text>Mot de passe: 123456</Text>
         </View>
         <View style={styles.inputContainer}>

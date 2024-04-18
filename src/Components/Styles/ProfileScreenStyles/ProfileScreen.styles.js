@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
 
   userNameText: { color: "white", fontSize: 20 },
 
-  userNameBottomText: { color: "#abece6", fontSize: 15 },
+  userNameBottomText: { color: "#419e53", fontSize: 15 },
 
   userImageBorder: {
     borderWidth: 3,

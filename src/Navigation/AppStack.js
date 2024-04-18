@@ -1,13 +1,9 @@
 import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import BottomTabNavigation from "./BottomTabNavigation";
-import AboutUs from "../Components/Screens/AboutUs/AboutUs";
 import Setting from "../Components/Screens/Setting/Setting";
 import CustomDrawer from "../Components/Custom/CustomDrawer";
-import { Ionicons, MaterialIcons, Entypo, Fontisto } from "@expo/vector-icons";
-import BlogNavigation from "./BlogNavigation";
+import { MaterialIcons, Entypo, FontAwesome5 } from "@expo/vector-icons";
 import ContactUs from "../Components/Screens/ContactUs/ContactUs";
-import EventNavigation from "./EventNavigation";
 import { useFonts, Raleway_700Bold } from "@expo-google-fonts/raleway";
 import {
   Nunito_500Medium,
@@ -15,13 +11,15 @@ import {
   Nunito_600SemiBold,
 } from "@expo-google-fonts/nunito";
 import CourseDetails from "../Components/Screens/CourseDetails/CourseDetails";
-import HomeNavigation from "./HomeNavigation";
 import Profile from "../Components/Screens/Profile/Profile";
 import Home from "../Components/Screens/Home/Home";
+import DeclareAbsence from "../Components/Screens/DeclareAbsence/DeclareAbsence";
+import ReplyToMessage from "../Components/Screens/ReplyToMessage/ReplyToMessage";
+import { Agent, Teacher } from "../Constants/userRoles";
 
 const Drawer = createDrawerNavigator();
 
-const AppStack = () => {
+const AppStack = ({ userRole }) => {
   let [fontsLoaded, fontError] = useFonts({
     Raleway_700Bold,
     Nunito_500Medium,
@@ -79,6 +77,22 @@ const AppStack = () => {
         }}
       />
 
+      {(userRole === Teacher || userRole === Agent) && (
+        <Drawer.Screen
+          name="Déclarer une absence"
+          component={DeclareAbsence}
+          options={{
+            drawerIcon: () => (
+              <FontAwesome5 name="user-clock" size={20} color={"gray"} />
+            ),
+            drawerLabelStyle: {
+              fontFamily: "Nunito_600SemiBold",
+              marginLeft: -20,
+            },
+          }}
+        />
+      )}
+
       <Drawer.Screen
         name="Settings"
         component={Setting}
@@ -94,6 +108,18 @@ const AppStack = () => {
       <Drawer.Screen
         name="Message Details"
         component={CourseDetails}
+        options={{
+          headerShown: false,
+          title: "Details",
+          drawerLabel: () => null,
+          drawerItemStyle: { height: 0 },
+          display: "none",
+        }}
+      />
+
+      <Drawer.Screen
+        name="ReplyToMessage"
+        component={ReplyToMessage}
         options={{
           headerShown: false,
           title: "Details",

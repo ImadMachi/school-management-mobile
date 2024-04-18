@@ -1,7 +1,7 @@
 import { format, isToday } from "date-fns";
 import { fr } from "date-fns/locale";
 
-export function formatMessageDate(dateString: string) {
+export function formatMessageDate(dateString: string | Date) {
   const date = new Date(dateString);
 
   if (isToday(date)) {

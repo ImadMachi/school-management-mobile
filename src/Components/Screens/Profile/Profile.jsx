@@ -26,6 +26,8 @@ import { fr } from "date-fns/locale";
 import CustomDrawerHeader from "../../Custom/CustomDrawerHeader";
 import { AuthContext } from "../../../Context/AuthProvider";
 import { Student, Teacher } from "../../../Constants/userRoles";
+import { BASE_URL } from "../../Utils/BASE_URL";
+import mapUserRole from "../../../Utils/mapUserRole";
 
 const Profile = () => {
   const navigation = useNavigation();
@@ -65,7 +67,13 @@ const Profile = () => {
                 <View style={styles.userImageBorder}>
                   <Image
                     style={styles.userImage}
-                    source={require("../../../../assets/Images/student-avatar.png")}
+                    source={
+                      user.profileImage
+                        ? {
+                            uri: `${BASE_URL}/uploads/${user.profileImage}`,
+                          }
+                        : require("../../../../assets/Images/student-avatar.png")
+                    }
                   />
                 </View>
                 <View style={styles.userNameSection}>
@@ -83,47 +91,61 @@ const Profile = () => {
                       { fontFamily: "Nunito_400Regular" },
                     ]}
                   >
-                    {user.role === Student ? "Etudiant" : "Parent"}
+                    {mapUserRole(user.role)}
                   </Text>
                 </View>
               </View>
 
               <View style={styles.achiveContainer}>
-                <View style={styles.achiveWrapper}>
-                  <FontAwesome name="venus-mars" size={20} color={"white"} />
-                  <Text
-                    style={[
-                      styles.achiveText,
-                      { fontFamily: "Nunito_600SemiBold" },
-                    ]}
-                  >
-                    {user?.userData?.sex}
-                  </Text>
-                </View>
-                <View style={styles.achiveWrapper}>
-                  <FontAwesome name="birthday-cake" size={20} color={"white"} />
-                  <Text
-                    style={[
-                      styles.achiveText,
-                      { fontFamily: "Nunito_600SemiBold" },
-                    ]}
-                  >
-                    {format(user?.userData?.dateOfBirth, "dd MMM yyyy", {
-                      locale: fr,
-                    })}
-                  </Text>
-                </View>
-                <View style={styles.achiveWrapper}>
-                  <SimpleLineIcons name="book-open" size={18} color={"white"} />
-                  <Text
-                    style={[
-                      styles.achiveText,
-                      { fontFamily: "Nunito_600SemiBold" },
-                    ]}
-                  >
-                    Class 2
-                  </Text>
-                </View>
+                {user?.userData?.sex && (
+                  <View style={styles.achiveWrapper}>
+                    <FontAwesome name="venus-mars" size={20} color={"white"} />
+                    <Text
+                      style={[
+                        styles.achiveText,
+                        { fontFamily: "Nunito_600SemiBold" },
+                      ]}
+                    >
+                      {user?.userData?.sex}
+                    </Text>
+                  </View>
+                )}
+                {!!user?.userData?.dateOfBirth && (
+                  <View style={styles.achiveWrapper}>
+                    <FontAwesome
+                      name="birthday-cake"
+                      size={20}
+                      color={"white"}
+                    />
+                    <Text
+                      style={[
+                        styles.achiveText,
+                        { fontFamily: "Nunito_600SemiBold" },
+                      ]}
+                    >
+                      {format(user?.userData?.dateOfBirth, "dd MMM yyyy", {
+                        locale: fr,
+                      })}
+                    </Text>
+                  </View>
+                )}
+                {user?.userData?.classe === Student && (
+                  <View style={styles.achiveWrapper}>
+                    <SimpleLineIcons
+                      name="book-open"
+                      size={18}
+                      color={"white"}
+                    />
+                    <Text
+                      style={[
+                        styles.achiveText,
+                        { fontFamily: "Nunito_600SemiBold" },
+                      ]}
+                    >
+                      {user?.userData?.classe?.name}
+                    </Text>
+                  </View>
+                )}
               </View>
             </LinearGradient>
 

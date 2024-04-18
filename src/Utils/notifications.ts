@@ -5,7 +5,7 @@ import { Platform } from "react-native";
 export async function schedulePushNotification(sender, subject) {
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: sender + " vous a envoyé un message 📬",
+      title: sender,
       body: subject,
       data: { data: "goes here" },
       sound: true,

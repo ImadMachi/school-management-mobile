@@ -3,6 +3,7 @@ import AppNavigation from "./src/Navigation/AppNavigation";
 import AuthProvider from "./src/Context/AuthProvider";
 import { StatusBar } from "react-native";
 import "./src/Config/axios-interceptor";
+import "./background-notifications";
 
 export default function App() {
   return (

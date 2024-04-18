@@ -1,4 +1,4 @@
-import React, { memo, useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -27,102 +27,54 @@ import { AuthContext } from "../../../Context/AuthProvider";
 import {
   getMessages,
   getNewMessages,
-  getStudentMessagesByParentId,
+  markMessageAsRead,
 } from "../../../services/messages";
 import { folders } from "../../../Constants/folders";
-import { BASE_URL } from "../../Utils/BASE_URL";
-import { formatMessageDate } from "../../../Utils/format-message-date";
 import {
   registerForPushNotificationsAsync,
   schedulePushNotification,
 } from "../../../Utils/notifications";
 import { getCategories } from "../../../services/categories";
-import { Parent } from "../../../Constants/userRoles";
+import { Agent, Parent, Teacher } from "../../../Constants/userRoles";
+import { ActivityIndicator } from "react-native";
+import MessageItem from "./Parts/MessageItem";
+import useInterval from "../../../hooks/useInterval";
+import { Toast } from "react-native-toast-notifications";
+import mapFolderName from "../../../Utils/mapFolderName";
+import { getStudentsByParent } from "../../../services/students";
+import { getGroupsByUser } from "../../../services/groups";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
   }),
 });
 
-const MessageItem = memo(({ item, handleMessageDetails }) => {
-  return (
-    <TouchableOpacity
-      style={styles.messageItem}
-      onPress={() => handleMessageDetails(item)}
-    >
-      <Image
-        source={{
-          uri: `${BASE_URL}/uploads/categories-images/${item?.category?.imagepath}`,
-        }}
-        style={styles.messageImage}
-      />
-      <View style={styles.messageDetails}>
-        <View style={styles.sendernameWrapper}>
-          <Text style={[styles.senderName, { fontFamily: "Raleway_700Bold" }]}>
-            {item.sender.senderData.firstName} {item.sender.senderData.lastName}
-          </Text>
-          <Text style={[styles.timeDate, { fontFamily: "Nunito_600SemiBold" }]}>
-            {formatMessageDate(item.createdAt)}
-          </Text>
-        </View>
-
-        <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={[styles.messageSubject, { fontFamily: "Raleway_700Bold" }]}
-        >
-          {item.subject}
-        </Text>
-
-        <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={[styles.messageBody, { fontFamily: "Nunito_600SemiBold" }]}
-        >
-          {item.body}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
-});
-
-function useInterval(callback, delay) {
-  const savedCallback = useRef();
-
-  // Remember the latest callback.
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  // Set up the interval.
-  useEffect(() => {
-    function tick() {
-      savedCallback.current();
-    }
-    if (delay !== null) {
-      let id = setInterval(tick, delay);
-      return () => clearInterval(id);
-    }
-  }, [delay]);
-}
-
 const Home = () => {
+  // ** States
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [categries, setCategries] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [allMessages, setAllMessages] = useState([]);
-  const [childrenMessages, setChildrenMessages] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(0);
+  const [children, setChildren] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [timestamp, setTimestamp] = useState(new Date().toISOString());
   const [filterText, setFilterText] = useState("");
-  const [activeChild, setActiveChild] = useState("Moi");
-
+  const [activeChild, setActiveChild] = useState({
+    id: 0,
+    student: { firstName: "Moi" },
+  });
+  const [activeGroup, setActiveGroup] = useState({});
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [activeFolder, setActiveFolder] = useState(folders.INBOX);
   const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  // ** Refs
   const notificationListener = useRef();
   const responseListener = useRef();
 
@@ -130,141 +82,146 @@ const Home = () => {
 
   const { user, isLoading: isLoadingAuthUser } = useContext(AuthContext);
 
-  const searchFilter = ({ text, category, childName, data = allMessages }) => {
-    let searchList = [];
-    if (!childName || childName == "Moi") {
-      searchList = data;
-    } else {
-      const child = childrenMessages.find(
-        (child) => child.studentData.student.firstName === childName
-      );
-      searchList = child.messages;
-    }
-
-    if (category) {
-      searchList = searchList.filter(
-        (item) =>
-          item.category.slug.toLowerCase().indexOf(category.toLowerCase()) > -1
-      );
-      setMessages(searchList);
-    }
-    if (text.trim() === "") {
-      setMessages(searchList);
-      return;
-    }
-
-    searchList = searchList.filter((item) => {
-      const matchSender =
-        item.sender?.senderData?.firstName
-          ?.toLowerCase()
-          .indexOf(text.toLowerCase()) > -1 ||
-        item.sender?.senderData?.lastName
-          ?.toLowerCase()
-          .indexOf(text.toLowerCase()) > -1;
-
-      const matchSubject =
-        item.subject.toLowerCase().indexOf(text.toLowerCase()) > -1;
-
-      const matchBody =
-        item.body.toLowerCase().indexOf(text.toLowerCase()) > -1;
-
-      const matchCategory =
-        item.category.name.toLowerCase().indexOf(text.toLowerCase()) > -1;
-      return matchSender || matchSubject || matchBody || matchCategory;
+  const searchFilter = async ({
+    text,
+    categoryId,
+    childUserId,
+    folder,
+    offset,
+    groupId,
+  }) => {
+    setIsFiltering(true);
+    const filteredMessages = await getMessages({
+      folder,
+      text,
+      categoryId,
+      userId: childUserId,
+      offset,
+      groupId,
     });
-    setMessages(searchList);
+    setMessages(filteredMessages);
+    setIsFiltering(false);
   };
 
-  const handleMessageDetails = (messageDetails) => {
+  const loadMoreMessages = async () => {
+    setIsLoadingMore(true);
+    const newMessages = await getMessages({
+      folder: activeFolder,
+      offset: messages.length,
+      categoryId: selectedCategory,
+      text: filterText,
+      userId: activeChild.id,
+      groupId: activeGroup?.id ? activeGroup.id : 0,
+    });
+    if (newMessages.length > 0) {
+      setMessages([...messages, ...newMessages]);
+    } else {
+      Toast.show("Il n'y a plus de messages à charger", {
+        type: "info",
+        position: "bottom",
+      });
+    }
+    setIsLoadingMore(false);
+  };
+
+  const handleMessageDetails = async (messageDetails) => {
     navigation.navigate("Message Details", {
       messageDetails,
     });
+
+    if (!messageDetails.isRead) {
+      await markMessageAsRead(messageDetails.id);
+      const updatedMessages = messages.map((message) => {
+        if (message.id === messageDetails.id) {
+          return { ...message, isRead: true };
+        }
+        return message;
+      });
+      setMessages(updatedMessages);
+    }
   };
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
   };
 
-  const handleChildChipPress = (childName) => {
-    setActiveChild(childName);
-    if (childName === "Moi") {
-      searchFilter({
-        text: filterText,
-        category: selectedCategory,
-        data: allMessages,
-        childName,
+  const handeChangeFolder = (folder) => {
+    setActiveGroup(null);
+    setActiveFolder(folder);
+  };
+
+  const handleChildChipPress = (child) => {
+    setActiveChild(child);
+  };
+
+  const handleGroupChipPress = (group) => {
+    setActiveFolder(undefined);
+    setActiveGroup(group);
+    if (group.unReadMessagesCount > 0) {
+      markMessageAsRead(group.id);
+      const updatedGroups = groups.map((g) => {
+        if (g.id === group.id) {
+          return { ...g, unReadMessagesCount: 0 };
+        }
+        return g;
       });
-    } else {
-      const child = childrenMessages.find(
-        (child) => child.studentData.student.firstName === childName
-      );
-      searchFilter({
-        text: filterText,
-        category: selectedCategory,
-        data: child.messages,
-        childName,
-      });
+      setGroups(updatedGroups);
     }
   };
 
   useEffect(() => {
     (async () => {
-      const data = await getMessages(folders.INBOX);
-      if (data) {
-        setAllMessages(data);
-        setMessages(data);
+      const messageData = await getMessages({ folder: folders.INBOX });
+      if (messageData) {
+        setMessages(messageData);
       }
-    })();
 
-    (async () => {
-      const data = await getCategories();
-      if (data) {
-        setCategries(data);
+      const categoryData = await getCategories();
+      if (categoryData) {
+        setCategries(categoryData);
       }
-    })();
 
-    (async () => {
+      const groupData = await getGroupsByUser(user.id);
+      if (groupData) {
+        setGroups(groupData);
+      }
+
       if (user.role == Parent) {
-        const data = await getStudentMessagesByParentId(user.userData.id);
-        setChildrenMessages(data);
+        const childrenData = await getStudentsByParent(user.userData.id);
+        setChildren(childrenData);
       }
+      setIsLoading(false);
     })();
-
-    setIsLoading(false);
   }, []);
-
-  // useEffect(() => {
-  //   if (user.role == Parent) {
-  //     navigation.navigate("Home Page Parent");
-  //   }
-  // }, [user]);
 
   useEffect(() => {
     searchFilter({
       text: filterText,
-      category: selectedCategory,
-      childName: activeChild,
+      categoryId: selectedCategory,
+      folder: activeFolder,
+      childUserId: activeChild.id,
+      groupId: activeGroup?.id ? activeGroup.id : 0,
     });
-  }, [selectedCategory, filterText]);
+  }, [selectedCategory, filterText, activeFolder, activeChild, activeGroup]);
 
   useInterval(async () => {
     let newMessages = (await getNewMessages(timestamp)) || [];
     setTimestamp(new Date(Date.now() - 10000).toISOString());
     if (newMessages.length > 0) {
-      const filteredMessages = newMessages.filter(
-        (message) =>
-          !allMessages.find((oldMessage) => oldMessage.id === message.id)
-      );
-      setAllMessages([...filteredMessages, ...allMessages]);
-      setMessages([...filteredMessages, ...allMessages]);
-
-      for (message of filteredMessages) {
+      for (let message of newMessages) {
         const fullName =
           message.sender.senderData.firstName +
           " " +
           message.sender.senderData.lastName;
         schedulePushNotification(fullName, message.subject);
       }
+      setMessages([...newMessages, ...messages]);
+      searchFilter({
+        text: filterText,
+        categoryId: selectedCategory,
+        folder: activeFolder,
+        childUserId: activeChild.id,
+      });
     }
     newMessages = [];
   }, 15000);
@@ -280,9 +237,7 @@ const Home = () => {
       });
 
     responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
-      });
+      Notifications.addNotificationResponseReceivedListener((response) => {});
 
     return () => {
       Notifications.removeNotificationSubscription(
@@ -304,7 +259,7 @@ const Home = () => {
 
   return (
     <>
-      {isLoading ? (
+      {isLoading || isLoadingAuthUser ? (
         <AnimatedLoading />
       ) : (
         <LinearGradient
@@ -338,66 +293,171 @@ const Home = () => {
                   size={26}
                   color={Colors.NEUTRAL.NEUTRAL_SHADOW_MOUNTAIN}
                 />
+                {selectedCategory !== 0 && <View style={styles.badge}></View>}
               </TouchableOpacity>
             </View>
 
-            <View style={{ marginTop: 16, paddingBottom: 110 }}>
-              {user.role == Parent && (
-                <FlatList
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                  data={[
-                    { id: 0, student: { firstName: "Moi" } },
-                    ...childrenMessages.map((child) => child.studentData),
-                  ]}
-                  keyExtractor={(item) => item.id.toString()}
-                  style={{ marginHorizontal: 16 }}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
+            <View
+              style={{
+                marginTop: 16,
+                paddingBottom:
+                  user.role == Parent || groups.length > 0 ? 200 : 150,
+              }}
+            >
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  marginHorizontal: 16,
+                  flexWrap: "wrap",
+                }}
+              >
+                {[folders.INBOX, folders.SENT].map((folder) => (
+                  <TouchableOpacity
+                    style={[
+                      childrenSliderStyles.categorySlideContainer,
+                      {
+                        backgroundColor:
+                          activeFolder === folder
+                            ? "rgba(160, 250, 236, 0.15)"
+                            : "white",
+                      },
+                    ]}
+                    onPress={() => handeChangeFolder(folder)}
+                    key={folder}
+                  >
+                    <Text
                       style={[
-                        childrenSliderStyles.categorySlideContainer,
+                        childrenSliderStyles.categoryText,
                         {
-                          backgroundColor:
-                            activeChild === item.student.firstName
-                              ? "rgba(160, 250, 236, 0.15)"
-                              : "white",
+                          color:
+                            activeFolder === folder
+                              ? Colors.PRIMARY.PRIMARY_RETRO_BLUE
+                              : "black",
+                          fontFamily: "Nunito_500Medium",
                         },
                       ]}
-                      onPress={() =>
-                        handleChildChipPress(item.student.firstName)
-                      }
                     >
-                      <Text
+                      {mapFolderName(folder)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View>
+                {user.role == Parent && (
+                  <FlatList
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    data={[
+                      { id: 0, student: { firstName: "Moi" } },
+                      ...children.map((child) => ({
+                        id: child.userId,
+                        student: child,
+                      })),
+                    ]}
+                    keyExtractor={(item) => item.id.toString()}
+                    style={{ marginHorizontal: 16 }}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
                         style={[
-                          childrenSliderStyles.categoryText,
+                          childrenSliderStyles.categorySlideContainer,
                           {
-                            color:
-                              activeChild === item.student.firstName
-                                ? Colors.PRIMARY.PRIMARY_RETRO_BLUE
-                                : "black",
-                            fontFamily: "Nunito_500Medium",
+                            backgroundColor:
+                              activeChild.student.firstName ===
+                              item.student.firstName
+                                ? "rgba(160, 250, 236, 0.15)"
+                                : "white",
                           },
                         ]}
+                        onPress={() => handleChildChipPress(item)}
                       >
-                        {item.student.firstName}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                />
-              )}
-              <FlatList
-                data={messages}
-                keyExtractor={(item) => item.id.toString()}
-                contentContainerStyle={{ paddingBottom: 50 }}
-                renderItem={({ item }) => (
-                  <MessageItem
-                    item={item}
-                    key={item.id}
-                    handleMessageDetails={handleMessageDetails}
+                        <Text
+                          style={[
+                            childrenSliderStyles.categoryText,
+                            {
+                              color:
+                                activeChild.student.firstName ===
+                                item.student.firstName
+                                  ? Colors.PRIMARY.PRIMARY_RETRO_BLUE
+                                  : "black",
+                              fontFamily: "Nunito_500Medium",
+                            },
+                          ]}
+                        >
+                          {item.student.firstName}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
                   />
                 )}
-              />
-              {messages.length === 0 && (
+                {(user.role == Teacher || user.role == Agent) && (
+                  <FlatList
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    data={groups}
+                    keyExtractor={(item) => item.id.toString()}
+                    style={{ marginHorizontal: 16 }}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        style={[
+                          childrenSliderStyles.categorySlideContainer,
+                          {
+                            backgroundColor:
+                              activeGroup?.id === item.id
+                                ? "rgba(160, 250, 236, 0.15)"
+                                : "white",
+                            position: "relative",
+                            borderTopEndRadius:
+                              item.unReadMessagesCount > 0 ? 0 : 50,
+                          },
+                        ]}
+                        onPress={() => handleGroupChipPress(item)}
+                      >
+                        <Text
+                          style={[
+                            childrenSliderStyles.categoryText,
+                            {
+                              color:
+                                activeGroup?.id === item.id
+                                  ? Colors.PRIMARY.PRIMARY_RETRO_BLUE
+                                  : "black",
+                              fontFamily: "Nunito_500Medium",
+                            },
+                          ]}
+                        >
+                          {item.name}
+                        </Text>
+                        {item.unReadMessagesCount > 0 && (
+                          <Text style={styles.countBadge}>
+                            {item.unReadMessagesCount}
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  />
+                )}
+              </View>
+              {isFiltering ? (
+                <ActivityIndicator size="large" style={{ marginTop: 30 }} />
+              ) : (
+                <>
+                  <FlatList
+                    data={messages}
+                    keyExtractor={(item) => item.id.toString()}
+                    onEndReached={() => loadMoreMessages()}
+                    renderItem={({ item }) => (
+                      <MessageItem
+                        item={item}
+                        key={item.id}
+                        handleMessageDetails={handleMessageDetails}
+                        folder={activeFolder}
+                      />
+                    )}
+                  />
+                </>
+              )}
+
+              {messages?.length === 0 && !isLoading && (
                 <View style={styles.noMessagesContainer}>
                   <Text style={styles.noMessagesText}>Aucun message</Text>
                   <Image
@@ -424,35 +484,46 @@ const Home = () => {
                 <TouchableOpacity
                   style={styles.modalContentButton}
                   onPress={() => {
-                    if (selectedCategory == category.slug) {
-                      setSelectedCategory("");
+                    if (selectedCategory == category.id) {
+                      setSelectedCategory(0);
                     } else {
-                      setSelectedCategory(category.slug);
+                      setSelectedCategory(category.id);
                     }
                     toggleModal();
                   }}
+                  key={category.id}
                 >
                   <Text>{category.name}</Text>
                   <RadioButton
                     onPress={() => {
-                      if (selectedCategory == category.slug) {
-                        setSelectedCategory("");
+                      if (selectedCategory == category.id) {
+                        setSelectedCategory(0);
                       } else {
-                        setSelectedCategory(category.slug);
+                        setSelectedCategory(category.id);
                       }
                       toggleModal();
                     }}
                     value="Sort By Name"
                     status={
-                      selectedCategory == category.slug
-                        ? "checked"
-                        : "unchecked"
+                      selectedCategory == category.id ? "checked" : "unchecked"
                     }
                   />
                 </TouchableOpacity>
               ))}
             </View>
           </Modal>
+          {isLoadingMore && (
+            <ActivityIndicator
+              size="large"
+              style={{
+                marginTop: 30,
+                position: "absolute",
+                bottom: 10,
+                left: "50%",
+                transform: [{ translateX: -20 }],
+              }}
+            />
+          )}
         </LinearGradient>
       )}
     </>

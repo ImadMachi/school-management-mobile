@@ -5,11 +5,10 @@ import { AuthContext } from "../Context/AuthProvider";
 import AppStack from "./AppStack";
 
 const AppNavigation = () => {
-  const { token } = useContext(AuthContext);
-
+  const { token, user } = useContext(AuthContext);
   return (
     <NavigationContainer>
-      {token !== null ? <AppStack /> : <AuthStack />}
+      {token !== null ? <AppStack userRole={user?.role} /> : <AuthStack />}
     </NavigationContainer>
   );
 };

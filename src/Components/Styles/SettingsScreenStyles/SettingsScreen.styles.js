@@ -21,6 +21,12 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 16,
   },
+  inputLabel: {
+    fontSize: 14,
+    padding: 3,
+    marginBottom: 3,
+    color: "#777",
+  },
   textInput: {
     width: "100%",
     height: 60,
@@ -28,7 +34,7 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
-    marginBottom: 16,
+    marginBottom: 8,
     fontSize: 16,
     color: "#333",
   },
