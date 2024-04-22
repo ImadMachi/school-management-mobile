@@ -7,18 +7,24 @@ import { Nunito_400Regular } from "@expo-google-fonts/nunito";
 import { ActivityIndicator } from "react-native-paper";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { sendMessage } from "../../../services/messages";
-import { set } from "date-fns";
+import { format, set } from "date-fns";
 
 const ContactForm = () => {
   const [formInfo, setFormInfo] = useState({
-    datedebut: new Date(),
-    datefin: new Date(),
-    reason: "",
+    startDate: new Date(),
+    endDate: new Date(),
+    raison: "",
   });
   const [error, setError] = useState("");
   const [buttonSpinner, setButtonSpinner] = useState(false);
 
   const handleContactSubmit = async () => {
+    setFormInfo((info) => ({
+      ...formInfo,
+      startDate: info.startDate.toLocaleString(),
+      endDate: info.endDate.toLocaleString(),
+    }));
+
     const message = formInfo.reason;
 
     if (message) {
@@ -42,26 +48,42 @@ const ContactForm = () => {
     return null;
   }
 
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setFormInfo({ ...formInfo, datedebut: currentDate });
-  };
-
-  const showMode = (currentMode) => {
+  const showStartMode = (currentMode) => {
     DateTimePickerAndroid.open({
-      value: formInfo.datedebut,
-      onChange,
+      value: formInfo.startDate,
+      onChange: (_, startDate) => {
+        setFormInfo({ ...formInfo, startDate });
+      },
       mode: currentMode,
       is24Hour: true,
     });
   };
 
-  const showDatepicker = () => {
-    showMode("date");
+  const showEndMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: formInfo.endDate,
+      onChange: (_, endDate) => {
+        setFormInfo({ ...formInfo, endDate });
+      },
+      mode: currentMode,
+      is24Hour: true,
+    });
   };
 
-  const showTimepicker = () => {
-    showMode("time");
+  const showStartDatepicker = () => {
+    showStartMode("date");
+  };
+
+  const showStartTimepicker = () => {
+    showStartMode("time");
+  };
+
+  const showEndDatepicker = () => {
+    showEndMode("date");
+  };
+
+  const showEndTimepicker = () => {
+    showEndMode("time");
   };
 
   return (
@@ -74,28 +96,59 @@ const ContactForm = () => {
           </Text>
         </View>
       )}
-      <Text style={{ color: "gray", marginBottom: 5 }}>Date de début:</Text>
-      <View style={{ display: "flex", flexDirection: "row" }}>
-        {/* <Button onPress={showTimepicker} title="Show time picker!" /> */}
+      <Text style={{ color: "gray", marginBottom: 5 }}>Date de début: </Text>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginBottom: 10,
+        }}
+      >
         <TextInput
+          placeholder={format(new Date(), "dd/MM/yyyy")}
           style={[styles.input, { marginVertical: 5, marginRight: 2 }]}
-          value={formInfo.datedebut}
+          value={format(formInfo.startDate, "dd/MM/yyyy")}
+          onFocus={showStartDatepicker}
         />
         <TextInput
-          placeholder={`${formInfo.datedebut}`}
-          style={[styles.input, { marginVertical: 5, marginLeft: 2 }]}
-          value={formInfo.datedebut}
+          placeholder={format(new Date(), "HH:mm")}
+          style={[styles.input, { marginVertical: 5, marginRight: 2 }]}
+          value={format(formInfo.startDate, "HH:mm")}
+          onFocus={showStartTimepicker}
+        />
+      </View>
+      <Text style={{ color: "gray", marginBottom: 5 }}>Date de fin: </Text>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginBottom: 10,
+        }}
+      >
+        <TextInput
+          placeholder={format(new Date(), "dd/MM/yyyy")}
+          style={[styles.input, { marginVertical: 5, marginRight: 2 }]}
+          value={format(formInfo.endDate, "dd/MM/yyyy")}
+          onFocus={showEndDatepicker}
+        />
+        <TextInput
+          placeholder={format(new Date(), "HH:mm")}
+          style={[styles.input, { marginVertical: 5, marginRight: 2 }]}
+          value={format(formInfo.endDate, "HH:mm")}
+          onFocus={showEndTimepicker}
         />
       </View>
       <TextInput
         style={styles.textArea}
-        placeholder="Message"
+        placeholder="Raison de l'absence"
         placeholderTextColor="#888"
         multiline={true}
         numberOfLines={4}
         fontSize={16}
         value={formInfo.reason}
-        onChangeText={(value) => setFormInfo({ ...formInfo, message: value })}
+        onChangeText={(value) => setFormInfo({ ...formInfo, raison: value })}
       />
       <TouchableOpacity
         style={styles.submitButton}
