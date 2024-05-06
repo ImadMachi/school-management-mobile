@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Button } from "react-native";
 import { styles } from "../../Styles/ContactScreenStyles/ContactFormScreen.stylex";
 import { FontAwesome } from "@expo/vector-icons";
@@ -8,30 +8,34 @@ import { ActivityIndicator } from "react-native-paper";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { sendMessage } from "../../../services/messages";
 import { format, set } from "date-fns";
+import { AuthContext } from "../../../Context/AuthProvider";
+import { declareAbsence } from "../../../services/absence";
 
 const ContactForm = () => {
   const [formInfo, setFormInfo] = useState({
     startDate: new Date(),
     endDate: new Date(),
-    raison: "",
+    reason: "",
   });
   const [error, setError] = useState("");
   const [buttonSpinner, setButtonSpinner] = useState(false);
+  const { user } = useContext(AuthContext);
 
   const handleContactSubmit = async () => {
-    setFormInfo((info) => ({
-      ...formInfo,
-      startDate: info.startDate.toLocaleString(),
-      endDate: info.endDate.toLocaleString(),
-    }));
+    const payload = {
+      startDate: formInfo.startDate.toLocaleString(),
+      endDate: formInfo.endDate.toLocaleString(),
+      reason: formInfo.reason,
+      absentUser: {
+        id: user.id,
+      },
+    };
 
-    const message = formInfo.reason;
-
-    if (message) {
+    if (payload.reason) {
       setError("");
       setButtonSpinner(true);
-      await sendMessage({ body: message });
-      setFormInfo({ ...formInfo, message: "" });
+      await declareAbsence(payload);
+      setFormInfo({ ...formInfo, reason: "" });
       setButtonSpinner(false);
     } else {
       setError("Veuillez remplir tous les champs requis");
@@ -74,16 +78,8 @@ const ContactForm = () => {
     showStartMode("date");
   };
 
-  const showStartTimepicker = () => {
-    showStartMode("time");
-  };
-
   const showEndDatepicker = () => {
     showEndMode("date");
-  };
-
-  const showEndTimepicker = () => {
-    showEndMode("time");
   };
 
   return (
@@ -111,12 +107,6 @@ const ContactForm = () => {
           value={format(formInfo.startDate, "dd/MM/yyyy")}
           onFocus={showStartDatepicker}
         />
-        <TextInput
-          placeholder={format(new Date(), "HH:mm")}
-          style={[styles.input, { marginVertical: 5, marginRight: 2 }]}
-          value={format(formInfo.startDate, "HH:mm")}
-          onFocus={showStartTimepicker}
-        />
       </View>
       <Text style={{ color: "gray", marginBottom: 5 }}>Date de fin: </Text>
       <View
@@ -133,12 +123,6 @@ const ContactForm = () => {
           value={format(formInfo.endDate, "dd/MM/yyyy")}
           onFocus={showEndDatepicker}
         />
-        <TextInput
-          placeholder={format(new Date(), "HH:mm")}
-          style={[styles.input, { marginVertical: 5, marginRight: 2 }]}
-          value={format(formInfo.endDate, "HH:mm")}
-          onFocus={showEndTimepicker}
-        />
       </View>
       <TextInput
         style={styles.textArea}
@@ -148,7 +132,7 @@ const ContactForm = () => {
         numberOfLines={4}
         fontSize={16}
         value={formInfo.reason}
-        onChangeText={(value) => setFormInfo({ ...formInfo, raison: value })}
+        onChangeText={(value) => setFormInfo({ ...formInfo, reason: value })}
       />
       <TouchableOpacity
         style={styles.submitButton}
