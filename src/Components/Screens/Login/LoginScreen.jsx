@@ -146,24 +146,6 @@ const Login = ({ navigation }) => {
         >
           Connectez-vous à votre compte d'apprentissage en ligne existant
         </Text>
-        <View
-          style={{
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: 20,
-            backgroundColor: "rgba(160, 250, 236, 0.15)",
-            marginHorizontal: 30,
-            padding: 10,
-            color: "#555555",
-          }}
-        >
-          <Text>Etudiant: lahlou@gmail.com</Text>
-          <Text>Parent: lahlou.parent@gmail.com</Text>
-          <Text>Enseignant: rahim.enseignant@gmail.com</Text>
-          <Text>Agent: mohsin.agent@gmail.com</Text>
-
-          <Text>Mot de passe: 123456</Text>
-        </View>
         <View style={styles.inputContainer}>
           <View>
             <TextInput

@@ -3,7 +3,13 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_URL } from "../Components/Utils/BASE_URL";
 import { Toast } from "react-native-toast-notifications";
-import { Agent, Parent, Student, Teacher } from "../Constants/userRoles";
+import {
+  Agent,
+  Director,
+  Parent,
+  Student,
+  Teacher,
+} from "../Constants/userRoles";
 
 export const AuthContext = createContext();
 
@@ -21,14 +27,14 @@ const AuthProvider = ({ children }) => {
         },
       });
 
-      if (
-        response.data.role !== Student &&
-        response.data.role !== Parent &&
-        response.data.role !== Teacher &&
-        response.data.role !== Agent
-      ) {
-        throw new Error("Invalid user role");
-      }
+      // if (
+      //   response.data.role !== Student &&
+      //   response.data.role !== Parent &&
+      //   response.data.role !== Teacher &&
+      //   response.data.role !== Agent
+      // ) {
+      //   throw new Error("Invalid user role");
+      // }
       const userData = modifyUserData(response.data);
 
       setUser(userData);
@@ -83,7 +89,10 @@ const AuthProvider = ({ children }) => {
   };
 
   const modifyUserData = (data) => {
-    if (data.role === Student) {
+    if (data.role === Director) {
+      data.userData = JSON.parse(JSON.stringify(data.director));
+      delete data.director;
+    } else if (data.role === Student) {
       data.userData = JSON.parse(JSON.stringify(data.student));
       delete data.student;
     } else if (data.role === Parent) {

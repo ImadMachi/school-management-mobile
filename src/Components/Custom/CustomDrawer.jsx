@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, Dimensions } from "react-native";
 import {
   DrawerContentScrollView,
@@ -15,10 +15,18 @@ import { BASE_URL } from "../Utils/BASE_URL";
 const CustomDrawer = (props) => {
   const { logout, user } = useContext(AuthContext);
 
+  const [imagePath, setImagePath] = useState("");
+
   let [fontsLoaded, fontError] = useFonts({
     Raleway_700Bold,
     Nunito_600SemiBold,
   });
+
+  useEffect(() => {
+    if (user?.profileImage) {
+      setImagePath(`${BASE_URL}/uploads/${user.profileImage}`);
+    }
+  }, [user]);
 
   if (!fontsLoaded && !fontError) {
     return null;
@@ -29,12 +37,13 @@ const CustomDrawer = (props) => {
       <View style={styles.header}>
         <Image
           source={
-            user.profileImage
+            imagePath
               ? {
                   uri: `${BASE_URL}/uploads/${user.profileImage}`,
                 }
-              : require("../../../assets/Images/student-avatar.png")
+              : require("../../../assets/avatar.png")
           }
+          onError={() => setImagePath("")}
           style={styles.headerImage}
         />
         <View style={styles.textContainer}>

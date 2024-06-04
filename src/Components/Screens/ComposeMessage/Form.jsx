@@ -1,67 +1,71 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { styles } from "../../Styles/ContactScreenStyles/ContactFormScreen.stylex";
 import { FontAwesome } from "@expo/vector-icons";
 import { useFonts, Raleway_700Bold } from "@expo-google-fonts/raleway";
 import { Nunito_400Regular } from "@expo-google-fonts/nunito";
 import { ActivityIndicator } from "react-native-paper";
-import {
-  contactGroupAdministrator,
-  sendMessage,
-} from "../../../services/messages";
-import { Dropdown } from "react-native-element-dropdown";
-import { AuthContext } from "../../../Context/AuthProvider";
-import { getGroupsByUser } from "../../../services/groups";
+import { Dropdown, MultiSelect } from "react-native-element-dropdown";
+import { getUsers } from "../../../services/users";
+import { sendMail } from "../../../services/messages";
+import { getCategories } from "../../../services/categories";
 
 const ContactForm = () => {
-  // ** Context
-  const { user, isLoading } = useContext(AuthContext);
-
   // ** States
   const [contactInfo, setContactInfo] = useState({
     subject: "",
     message: "",
+    selectedUsers: [],
+    selectedCategory: undefined,
   });
   const [error, setError] = useState("");
   const [buttonSpinner, setButtonSpinner] = useState(false);
-  const [groups, setGroups] = useState([]);
-  const [selectedRecipient, setSelectedRecipient] = useState();
+  const [users, setUsers] = useState([]);
+  const [categories, setCategories] = useState([]);
 
+  // ** Effects
+  useEffect(() => {
+    (async () => {
+      const data = await getUsers();
+      data.forEach((user) => {
+        user.fullname = `${user.userData.firstName} ${user.userData.lastName}`;
+      });
+      setUsers(data);
+
+      const categoryData = await getCategories();
+      setCategories(categoryData);
+    })();
+  }, []);
+
+  // ** Functions
   const handleContactSubmit = async () => {
     const message = contactInfo.message;
     const subject = contactInfo.subject;
+    const recipients = contactInfo.selectedUsers.map((i) => ({ id: i }));
+    const categoryId = contactInfo.selectedCategory.id;
 
-    if (subject && message && selectedRecipient) {
+    if (subject && message && recipients.length > 0 && categoryId) {
       setError("");
       setButtonSpinner(true);
-      if (selectedRecipient.name == "Administration") {
-        await sendMessage({ body: message, subject });
-      } else {
-        await contactGroupAdministrator({
-          body: message,
-          subject,
-          groupId: selectedRecipient.id,
-        });
-      }
-      setContactInfo({ ...contactInfo, subject: "", message: "" });
-      setSelectedRecipient(null);
+      await sendMail({
+        body: message,
+        subject,
+        recipients,
+        categoryId,
+      });
+      setContactInfo({
+        ...contactInfo,
+        subject: "",
+        message: "",
+        selectedUsers: [],
+        selectedCategory: undefined,
+      });
       setButtonSpinner(false);
     } else {
       setError("Veuillez remplir tous les champs requis");
       setButtonSpinner(false);
     }
   };
-
-  useEffect(() => {
-    (async () => {
-      if (user) {
-        const groups = await getGroupsByUser(user.id);
-        if (groups) {
-          setGroups(groups);
-        }
-      }
-    })();
-  }, [user]);
 
   let [fontsLoaded, fontError] = useFonts({
     Raleway_700Bold,
@@ -74,26 +78,6 @@ const ContactForm = () => {
 
   return (
     <View style={styles.container}>
-      <View style={{ marginBottom: 16 }}>
-        <Dropdown
-          style={[styles.dropdown]}
-          placeholderStyle={styles.placeholderStyle}
-          selectedTextStyle={styles.selectedTextStyle}
-          inputSearchStyle={styles.inputSearchStyle}
-          data={[{ name: "Administration", id: 1 }, ...groups]}
-          maxHeight={300}
-          labelField="name"
-          valueField="id"
-          placeholder={
-            <Text style={{ color: "#888" }}>Sélectionner le destinataire</Text>
-          }
-          value={selectedRecipient}
-          onChange={(item) => {
-            setSelectedRecipient(item);
-          }}
-        />
-      </View>
-
       {error && (
         <View style={styles.errorContainer}>
           <FontAwesome name="close" size={18} color={"red"} />
@@ -102,6 +86,52 @@ const ContactForm = () => {
           </Text>
         </View>
       )}
+
+      <View style={{ marginBottom: 16 }}>
+        <MultiSelect
+          style={styles.dropdown}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          search
+          data={users}
+          labelField="fullname"
+          valueField="id"
+          placeholder={
+            <Text style={{ color: "#888" }}>
+              Sélectionner les destinataires
+            </Text>
+          }
+          searchPlaceholder="Rechercher"
+          value={contactInfo.selectedUsers}
+          onChange={(item) => {
+            setContactInfo({ ...contactInfo, selectedUsers: item });
+          }}
+        />
+      </View>
+
+      <View style={{ marginBottom: 16 }}>
+        <Dropdown
+          style={[styles.dropdown]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          data={categories}
+          search
+          maxHeight={300}
+          labelField="name"
+          valueField="id"
+          placeholder={
+            <Text style={{ color: "#888" }}>Sélectionner la catégorie</Text>
+          }
+          searchPlaceholder="Rechercher"
+          value={contactInfo.selectedCategory}
+          onChange={(item) => {
+            setContactInfo({ ...contactInfo, selectedCategory: item });
+          }}
+        />
+      </View>
 
       <View style={styles.inputContainer}>
         <TextInput

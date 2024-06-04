@@ -119,6 +119,63 @@ export async function sendMessage(data: sendMessageProps) {
   }
 }
 
+interface ContactGroupAdministratorProps {
+  subject: string;
+  body: string;
+  categoryId: number;
+}
+export async function contactGroupAdministrator(
+  data: ContactGroupAdministratorProps
+) {
+  try {
+    await axios.post(`${BASE_URL}/messages/contact-group-administrator`, data);
+
+    Toast.show("message envoyé avec succès", {
+      type: "success",
+      placement: "bottom",
+      duration: 2000,
+      animationType: "zoom-in",
+    });
+  } catch (error) {
+    Toast.show("Erreur lors de l'envoi du message", {
+      type: "danger",
+      placement: "bottom",
+      duration: 2000,
+      animationType: "zoom-in",
+      successColor: "red",
+    });
+  }
+}
+
+interface sendMailProps {
+  subject: string;
+  body: string;
+  recipients: { id: number }[];
+  categoryId: number;
+}
+export async function sendMail(data: sendMailProps) {
+  try {
+    await axios.post(`${BASE_URL}/messages`, data);
+
+    Toast.show("message envoyé avec succès", {
+      type: "success",
+      placement: "bottom",
+      duration: 2000,
+      animationType: "zoom-in",
+    });
+  } catch (error) {
+    console.log(error);
+
+    Toast.show("Erreur lors de l'envoi du message", {
+      type: "danger",
+      placement: "bottom",
+      duration: 2000,
+      animationType: "zoom-in",
+      successColor: "red",
+    });
+  }
+}
+
 interface ReplayToMessageProps {
   subject: string;
   body: string;

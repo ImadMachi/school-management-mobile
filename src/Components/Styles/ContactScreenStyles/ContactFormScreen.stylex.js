@@ -13,9 +13,19 @@ export const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 16,
   },
+  dropdown: {
+    backgroundColor: "white",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
   recipientPicker: {
     marginBottom: 16,
     backgroundColor: "white",
+  },
+  dropdown: {
+    backgroundColor: "white",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
   },
   input: {
     flex: 1,

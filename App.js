@@ -3,13 +3,13 @@ import AppNavigation from "./src/Navigation/AppNavigation";
 import AuthProvider from "./src/Context/AuthProvider";
 import { StatusBar } from "react-native";
 import "./src/Config/axios-interceptor";
-import "./background-notifications";
+// import "./background-notifications";
 
 export default function App() {
   return (
     <AuthProvider>
       <StatusBar backgroundColor={"#E5ECF9"} barStyle="dark-content" />
-      <ToastProvider>
+      <ToastProvider duration={50}>
         <AppNavigation />
       </ToastProvider>
     </AuthProvider>

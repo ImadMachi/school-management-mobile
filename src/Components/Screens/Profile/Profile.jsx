@@ -25,7 +25,12 @@ import { fr } from "date-fns/locale";
 
 import CustomDrawerHeader from "../../Custom/CustomDrawerHeader";
 import { AuthContext } from "../../../Context/AuthProvider";
-import { Student, Teacher } from "../../../Constants/userRoles";
+import {
+  Administrator,
+  Director,
+  Student,
+  Teacher,
+} from "../../../Constants/userRoles";
 import { BASE_URL } from "../../Utils/BASE_URL";
 import mapUserRole from "../../../Utils/mapUserRole";
 
@@ -34,6 +39,8 @@ const Profile = () => {
 
   const { user, isLoading } = useContext(AuthContext);
 
+  const [imagePath, setImagePath] = useState("");
+
   let [fontsLoaded, fontError] = useFonts({
     Raleway_600SemiBold,
     Raleway_700Bold,
@@ -41,6 +48,12 @@ const Profile = () => {
     Nunito_600SemiBold,
     Nunito_700Bold,
   });
+
+  useEffect(() => {
+    if (user?.profileImage) {
+      setImagePath(`${BASE_URL}/uploads/${user.profileImage}`);
+    }
+  }, [user]);
 
   if (!fontsLoaded && !fontError) {
     return null;
@@ -68,12 +81,13 @@ const Profile = () => {
                   <Image
                     style={styles.userImage}
                     source={
-                      user.profileImage
+                      imagePath
                         ? {
                             uri: `${BASE_URL}/uploads/${user.profileImage}`,
                           }
-                        : require("../../../../assets/Images/student-avatar.png")
+                        : require("../../../../assets/avatar.png")
                     }
+                    onError={() => setImagePath("")}
                   />
                 </View>
                 <View style={styles.userNameSection}>
@@ -196,7 +210,15 @@ const Profile = () => {
                 </TouchableOpacity>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.detailWrapper}
+                style={[
+                  styles.detailWrapper,
+                  {
+                    display:
+                      user.role == Director || user.role == Administrator
+                        ? "none"
+                        : "flex",
+                  },
+                ]}
                 onPress={() => navigation.navigate("Contact")}
               >
                 <View style={styles.detailLeftSection}>
@@ -229,6 +251,44 @@ const Profile = () => {
                 </View>
                 <TouchableOpacity
                   onPress={() => navigation.navigate("Contact")}
+                >
+                  <AntDesign name="right" size={26} color={"#CBD5E0"} />
+                </TouchableOpacity>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.detailWrapper}
+                onPress={() => navigation.navigate("Change Password")}
+              >
+                <View style={styles.detailLeftSection}>
+                  <View style={styles.detailUserIcon}>
+                    <FontAwesome
+                      style={styles.iconCenter}
+                      name="shield"
+                      size={20}
+                      color={"black"}
+                    />
+                  </View>
+                  <View>
+                    <Text
+                      style={[
+                        styles.boldText,
+                        { fontFamily: "Nunito_700Bold" },
+                      ]}
+                    >
+                      Changer le mot de passe
+                    </Text>
+                    <Text
+                      style={[
+                        styles.regularText,
+                        { fontFamily: "Nunito_400Regular" },
+                      ]}
+                    >
+                      Changer le mot de passe
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Change Password")}
                 >
                   <AntDesign name="right" size={26} color={"#CBD5E0"} />
                 </TouchableOpacity>

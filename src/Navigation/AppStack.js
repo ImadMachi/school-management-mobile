@@ -15,7 +15,14 @@ import Profile from "../Components/Screens/Profile/Profile";
 import Home from "../Components/Screens/Home/Home";
 import DeclareAbsence from "../Components/Screens/DeclareAbsence/DeclareAbsence";
 import ReplyToMessage from "../Components/Screens/ReplyToMessage/ReplyToMessage";
-import { Agent, Teacher } from "../Constants/userRoles";
+import {
+  Administrator,
+  Agent,
+  Director,
+  Teacher,
+} from "../Constants/userRoles";
+import ComposeMessage from "../Components/Screens/ComposeMessage/DeclareAbsence";
+import ChangePassword from "../Components/Screens/ChangePassword/ChangePassword";
 
 const Drawer = createDrawerNavigator();
 
@@ -63,19 +70,38 @@ const AppStack = ({ userRole }) => {
           title: "Profile",
         }}
       />
-      <Drawer.Screen
-        name="Contact"
-        component={ContactUs}
-        options={{
-          drawerIcon: () => (
-            <MaterialIcons name="contact-page" size={22} color={"gray"} />
-          ),
-          drawerLabelStyle: {
-            fontFamily: "Nunito_600SemiBold",
-            marginLeft: -20,
-          },
-        }}
-      />
+
+      {userRole != Director && userRole != Administrator && (
+        <Drawer.Screen
+          name="Contact"
+          component={ContactUs}
+          options={{
+            drawerIcon: () => (
+              <MaterialIcons name="contact-page" size={22} color={"gray"} />
+            ),
+            drawerLabelStyle: {
+              fontFamily: "Nunito_600SemiBold",
+              marginLeft: -20,
+            },
+          }}
+        />
+      )}
+
+      {(userRole === Director || userRole === Administrator) && (
+        <Drawer.Screen
+          name="Ecrire un message"
+          component={ComposeMessage}
+          options={{
+            drawerIcon: () => (
+              <FontAwesome5 name="calendar-times" size={20} color={"gray"} />
+            ),
+            drawerLabelStyle: {
+              fontFamily: "Nunito_600SemiBold",
+              marginLeft: -20,
+            },
+          }}
+        />
+      )}
 
       {(userRole === Teacher || userRole === Agent) && (
         <Drawer.Screen
@@ -96,6 +122,18 @@ const AppStack = ({ userRole }) => {
       <Drawer.Screen
         name="Settings"
         component={Setting}
+        options={{
+          headerShown: false,
+          title: "Details",
+          drawerLabel: () => null,
+          drawerItemStyle: { height: 0 },
+          display: "none",
+        }}
+      />
+
+      <Drawer.Screen
+        name="Change Password"
+        component={ChangePassword}
         options={{
           headerShown: false,
           title: "Details",

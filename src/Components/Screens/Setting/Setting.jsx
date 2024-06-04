@@ -14,6 +14,13 @@ const Setting = () => {
     lastName: "",
     email: "",
   });
+  const [imagePath, setImagePath] = useState("");
+
+  useEffect(() => {
+    if (user?.profileImage) {
+      setImagePath(`${BASE_URL}/uploads/${user.profileImage}`);
+    }
+  }, [user]);
 
   useEffect(() => {
     setProfileInfo({
@@ -37,12 +44,13 @@ const Setting = () => {
             <View style={styles.container}>
               <Image
                 source={
-                  user.profileImage
+                  imagePath
                     ? {
                         uri: `${BASE_URL}/uploads/${user.profileImage}`,
                       }
-                    : require("../../../../assets/Images/student-avatar.png")
+                    : require("../../../../assets/avatar.png")
                 }
+                onError={() => setImagePath("")}
                 style={styles.profileImage}
               />
               <View style={{ width: "100%" }}>

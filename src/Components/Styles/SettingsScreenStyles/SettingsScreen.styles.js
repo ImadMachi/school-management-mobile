@@ -8,13 +8,23 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
-    marginTop: 50,
   },
   profileImage: {
     width: 120,
     height: 120,
     borderRadius: 60,
     marginBottom: 16,
+  },
+  submitButton: {
+    backgroundColor: "#72DE95",
+    borderRadius: 4,
+    alignItems: "center",
+    paddingVertical: 12,
+    marginBottom: 16,
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontSize: 18,
   },
   title: {
     fontSize: 24,
