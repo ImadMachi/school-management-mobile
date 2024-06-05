@@ -6,6 +6,7 @@ import { styles } from "../../../Styles/SearchScreenStyles/SearchScreen.styles";
 import { formatMessageDate } from "../../../../Utils/format-message-date";
 import { Message } from "../../../../models/Message";
 import { folders } from "../../../../Constants/folders";
+import { Parent } from "../../../../Constants/userRoles";
 
 interface MessageItemProps {
   item: Message;
@@ -40,7 +41,9 @@ const MessageItem = memo(
                 },
               ]}
             >
-              {`${item.sender.senderData.firstName} ${item.sender.senderData.lastName}`}
+              {item.sender.role == Parent
+                ? `${item.sender.senderData.fatherFirstName} ${item.sender.senderData.fatherLastName} - ${item.sender.senderData.motherFirstName} ${item.sender.senderData.motherLastName}`
+                : `${item.sender.senderData.firstName} ${item.sender.senderData.lastName}`}
             </Text>
             <Text
               style={[

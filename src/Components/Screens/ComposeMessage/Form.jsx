@@ -9,6 +9,7 @@ import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 import { getUsers } from "../../../services/users";
 import { sendMail } from "../../../services/messages";
 import { getCategories } from "../../../services/categories";
+import { Parent } from "../../../Constants/userRoles";
 
 const ContactForm = () => {
   // ** States
@@ -28,7 +29,10 @@ const ContactForm = () => {
     (async () => {
       const data = await getUsers();
       data.forEach((user) => {
-        user.fullname = `${user.userData.firstName} ${user.userData.lastName}`;
+        user.fullname =
+          user.role == Parent
+            ? `${user.userData.fatherFirstName} ${user.userData.fatherLastName} - ${user.userData.motherFirstName} ${user.userData.motherLastName}`
+            : `${user.userData.firstName} ${user.userData.lastName}`;
       });
       setUsers(data);
 

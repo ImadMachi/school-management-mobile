@@ -4,10 +4,12 @@ import { Category } from "./Category";
 export type SenderType = {
   id: number;
   email: string;
+  role: string;
   senderData: {
     id: number;
     firstName: string;
     lastName: string;
+    [key: string]: any;
   };
 };
 

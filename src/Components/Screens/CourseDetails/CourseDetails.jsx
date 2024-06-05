@@ -36,6 +36,7 @@ import {
 import CustomBackHeader from "../../Custom/CustomBackHeader";
 import { BASE_URL } from "../../Utils/BASE_URL";
 import { set } from "date-fns";
+import { Parent } from "../../../Constants/userRoles";
 
 const IMAGE_EXTENSIONS = [
   "png",
@@ -179,8 +180,9 @@ const MessageDetails = () => {
                   { fontFamily: "Nunito_500Medium" },
                 ]}
               >
-                {messageDetails.sender.senderData.firstName}{" "}
-                {messageDetails.sender.senderData.lastName}
+                {messageDetails.sender.role == Parent
+                  ? `${messageDetails.sender.senderData.fatherFirstName} ${messageDetails.sender.senderData.fatherLastName} - ${messageDetails.sender.senderData.motherFirstName} ${messageDetails.sender.senderData.motherLastName}`
+                  : `${messageDetails.sender.senderData.firstName} ${messageDetails.sender.senderData.lastName}`}
               </Text>
             </View>
             <View style={styles.instructorNameWrap}>
@@ -190,9 +192,17 @@ const MessageDetails = () => {
                   navigation.navigate("ReplyToMessage", {
                     replyData: {
                       recipientName:
-                        messageDetails.sender.senderData.firstName +
-                        " " +
-                        messageDetails.sender.senderData.lastName,
+                        messageDetails.sender.role == Parent
+                          ? messageDetails.sender.senderData.fatherFirstName +
+                            " " +
+                            messageDetails.sender.senderData.fatherLastName +
+                            " - " +
+                            messageDetails.sender.senderData.motherFirstName +
+                            " " +
+                            messageDetails.sender.senderData.motherLastName
+                          : messageDetails.sender.senderData.firstName +
+                            " " +
+                            messageDetails.sender.senderData.lastName,
                       parentMessageId: messageDetails.id,
                       categoryId: messageDetails.category.id,
                       recipientId: messageDetails.sender.senderData.id,

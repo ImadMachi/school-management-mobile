@@ -11,6 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useFonts, Raleway_700Bold } from "@expo-google-fonts/raleway";
 import { Nunito_600SemiBold } from "@expo-google-fonts/nunito";
 import { BASE_URL } from "../Utils/BASE_URL";
+import { Parent } from "../../Constants/userRoles";
 
 const CustomDrawer = (props) => {
   const { logout, user } = useContext(AuthContext);
@@ -48,7 +49,9 @@ const CustomDrawer = (props) => {
         />
         <View style={styles.textContainer}>
           <Text style={[styles.headerText, { fontFamily: "Raleway_700Bold" }]}>
-            {user?.userData?.firstName} {user?.userData?.lastName}
+            {user?.role == Parent
+              ? `${user?.userData.fatherFirstName} ${user?.userData.fatherLastName} - ${user?.userData.motherFirstName} ${user?.userData.motherLastName}`
+              : `${user?.userData?.firstName} ${user?.userData?.lastName}`}
           </Text>
           <Text
             style={[styles.headerEmail, { fontFamily: "Nunito_600SemiBold" }]}

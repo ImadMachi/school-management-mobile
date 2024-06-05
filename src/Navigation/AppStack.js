@@ -19,6 +19,7 @@ import {
   Administrator,
   Agent,
   Director,
+  Student,
   Teacher,
 } from "../Constants/userRoles";
 import ComposeMessage from "../Components/Screens/ComposeMessage/DeclareAbsence";
@@ -71,21 +72,23 @@ const AppStack = ({ userRole }) => {
         }}
       />
 
-      {userRole != Director && userRole != Administrator && (
-        <Drawer.Screen
-          name="Contact"
-          component={ContactUs}
-          options={{
-            drawerIcon: () => (
-              <MaterialIcons name="contact-page" size={22} color={"gray"} />
-            ),
-            drawerLabelStyle: {
-              fontFamily: "Nunito_600SemiBold",
-              marginLeft: -20,
-            },
-          }}
-        />
-      )}
+      {userRole != Director &&
+        userRole != Administrator &&
+        userRole != Student && (
+          <Drawer.Screen
+            name="Contact"
+            component={ContactUs}
+            options={{
+              drawerIcon: () => (
+                <MaterialIcons name="contact-page" size={22} color={"gray"} />
+              ),
+              drawerLabelStyle: {
+                fontFamily: "Nunito_600SemiBold",
+                marginLeft: -20,
+              },
+            }}
+          />
+        )}
 
       {(userRole === Director || userRole === Administrator) && (
         <Drawer.Screen

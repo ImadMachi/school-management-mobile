@@ -28,6 +28,7 @@ import { AuthContext } from "../../../Context/AuthProvider";
 import {
   Administrator,
   Director,
+  Parent,
   Student,
   Teacher,
 } from "../../../Constants/userRoles";
@@ -74,7 +75,10 @@ const Profile = () => {
             <LinearGradient
               colors={["#72DE95", "#8af2ac"]}
               end={{ x: 1, y: 0.9 }}
-              style={styles.mainBannerContainer}
+              style={[
+                styles.mainBannerContainer,
+                { display: user.role == Parent ? "none" : "flex" },
+              ]}
             >
               <View style={styles.bannerContainer}>
                 <View style={styles.userImageBorder}>
@@ -99,6 +103,7 @@ const Profile = () => {
                   >
                     {user?.userData?.firstName} {user?.userData?.lastName}
                   </Text>
+
                   <Text
                     style={[
                       styles.userNameBottomText,
@@ -172,7 +177,10 @@ const Profile = () => {
                 Détails du compte
               </Text>
               <TouchableOpacity
-                style={styles.detailWrapper}
+                style={[
+                  styles.detailWrapper,
+                  { display: user.role == Parent ? "none" : "flex" },
+                ]}
                 onPress={() => navigation.navigate("Settings")}
               >
                 <View style={styles.detailLeftSection}>
