@@ -2,10 +2,10 @@
   "build": {
     "preview": {
       "android": {
-        "buildType": "apk"
+        "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_BASE_URL": "https://arganier-backend-d6648b3a05de.herokuapp.com"
+        "EXPO_PUBLIC_BASE_URL": "http://extranet.groupescolairelarganier.com:8000"
       }
     },
     "production": {}

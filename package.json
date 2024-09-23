@@ -4,6 +4,7 @@
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "bash ./update_env.sh && npx expo start --tunnel",
+    "start:prod": "npx expo start --tunnel",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
